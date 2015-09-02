@@ -14,8 +14,9 @@ import javax.swing.border.EtchedBorder;
 import ru.intech.ussd.modeler.Main;
 import ru.intech.ussd.modeler.entities.Room;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
+import ru.intech.ussd.modeler.graphobjects.VertexFinish;
 import ru.intech.ussd.modeler.graphobjects.VertexRoom;
-import ru.intech.ussd.modeler.graphobjects.VertexSpecial;
+import ru.intech.ussd.modeler.graphobjects.VertexStart;
 
 public class VertexIcon implements Icon {
 	// =================================================================================================================
@@ -40,28 +41,24 @@ public class VertexIcon implements Icon {
 		label.setVerticalAlignment(SwingConstants.CENTER);
 		label.setFont(label.getFont().deriveFont(Main.fontSize));
 
-		if (vertex instanceof VertexSpecial) {
-			String s = ((VertexSpecial) vertex).getName();
-			label.setText(s);
-			Color color = null;
-			if ("finish".equalsIgnoreCase(s) ) {
-				color = new Color(picked ?  X11Colors.OLIVE : X11Colors.OLIVE_DRAB);
-			} else {
-				color = new Color(picked ?  X11Colors.LIME : X11Colors.LIME_GREEN);
-			}
-			label.setBackground(color);
+		if (vertex instanceof VertexStart) {
+			label.setText("start");
+			label.setBackground(new Color(picked ?  X11Colors.LIME : X11Colors.LIME_GREEN));
 			label.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 		}
-
+		if (vertex instanceof VertexFinish) {
+			label.setText("finish");
+			label.setBackground(new Color(picked ?  X11Colors.OLIVE : X11Colors.OLIVE_DRAB));
+			label.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
+		}
 		if (vertex instanceof VertexRoom) {
-			Room roomHeader = ((VertexRoom) vertex).getRoom();
-			String text = "<html><center>Room(" + roomHeader.getId()  + ")<br>" + roomHeader.getDescription() + "</center></html>";
+			Room room = ((VertexRoom) vertex).getRoom();
+			String text = "<html><center>Room(" + (room == null ? "null" : String.valueOf(room.getId()))
+					+ ")<br>" + ((VertexRoom) vertex).getDescription() + "</center></html>";
 			label.setText(text);
 			label.setBackground(new Color(picked ? X11Colors.DEEP_SKY_BLUE : X11Colors.SKY_BLUE));
 			label.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 		}
-
-
 		bi = new BufferedImage((int) Math.round(Main.width), (int) Math.round(Main.height), BufferedImage.TYPE_INT_ARGB);
 		Graphics g = bi.createGraphics();
 		label.paint(g);
@@ -69,14 +66,6 @@ public class VertexIcon implements Icon {
 
 	// =================================================================================================================
 	// Methods for/from SuperClass/Interface
-	// =================================================================================================================
-
-	// =================================================================================================================
-	// Getter & Setter
-	// =================================================================================================================
-
-	// =================================================================================================================
-	// Methods
 	// =================================================================================================================
 	public void paintIcon(Component c, Graphics g, int x, int y) {
 		g.drawImage(bi, x, y, null);
@@ -89,6 +78,14 @@ public class VertexIcon implements Icon {
 	public int getIconHeight() {
 		return (int) Math.round(Main.height);
 	}
+
+	// =================================================================================================================
+	// Getter & Setter
+	// =================================================================================================================
+
+	// =================================================================================================================
+	// Methods
+	// =================================================================================================================
 
 	// =================================================================================================================
 	// Inner and Anonymous Classes
