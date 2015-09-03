@@ -141,7 +141,7 @@ public class InfoPanel extends JPanel {
 			txtId.setText(String.valueOf(rh.getId()));
 			txtNameOrDesription.setText(rh.getDescription());
 			txtNameOrDesription.setEditable(true);
-			txtFunctionOrKey.setText(rb == null ? "none" : rb.getVal());
+			txtFunctionOrKey.setText(rb == null ? "none" : rb.getValue());
 			txtFunctionOrKey.setEditable(true);
 		}
 
@@ -196,7 +196,7 @@ public class InfoPanel extends JPanel {
 			}
 			set.add(rb);
 		}
-		rb.setVal(txtFunctionOrKey.getText());
+		rb.setValue(txtFunctionOrKey.getText());
 	}
 
 	private void saveEdge() {

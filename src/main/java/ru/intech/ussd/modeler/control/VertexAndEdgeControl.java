@@ -7,9 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.intech.ussd.modeler.graphobjects.Edge;
+import ru.intech.ussd.modeler.graphobjects.EdgeAction;
+import ru.intech.ussd.modeler.graphobjects.EdgeFinish;
+import ru.intech.ussd.modeler.graphobjects.EdgeStart;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
+import ru.intech.ussd.modeler.graphobjects.VertexFinish;
 import ru.intech.ussd.modeler.graphobjects.VertexRoom;
-import ru.intech.ussd.modeler.graphobjects.VertexSpecial;
+import ru.intech.ussd.modeler.graphobjects.VertexStart;
 import ru.intech.ussd.modeler.util.Unit;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.event.GraphEvent;
@@ -44,15 +48,21 @@ public class VertexAndEdgeControl implements GraphEventListener<Vertex, Unit<Edg
 		switch (evt.getType()) {
 			case EDGE_ADDED :
 				edge = ((GraphEvent.Edge<Vertex, Unit<Edge>>) evt).getEdge();
-				detectVirtualAction(evt.getSource(), edge);
-				setRoomHeader(evt.getSource(), edge);
+				if (edge.getValue() == null) {
+					createEdge(evt.getSource(), edge);
+				}
 				LOG.debug("EDGE_ADDED : {}", edge);
 				break;
 
 			case EDGE_REMOVED :
 				edge = ((GraphEvent.Edge<Vertex, Unit<Edge>>) evt).getEdge();
-				if (edge.getAction().getId() != null) {
-					removedEdges.add(edge);
+				if ((edge.getValue() instanceof EdgeStart) && (((EdgeStart) edge.getValue()).getEntryPoint() != null)
+						&& (((EdgeStart) edge.getValue()).getEntryPoint().getId() != null)) {
+					removedEdges.add(edge.getValue());
+				}
+				if ((edge.getValue() instanceof EdgeAction) && (((EdgeAction) edge.getValue()).getAction() != null)
+						&& (((EdgeAction) edge.getValue()).getAction().getId() != null)) {
+					removedEdges.add(edge.getValue());
 				}
 				LOG.debug("EDGE_REMOVED : {}", edge);
 				break;
@@ -64,7 +74,8 @@ public class VertexAndEdgeControl implements GraphEventListener<Vertex, Unit<Edg
 
 			case VERTEX_REMOVED :
 				vertex = ((GraphEvent.Vertex<Vertex, Unit<Edge>>) evt).getVertex();
-				if ((vertex instanceof VertexRoom) && (((VertexRoom) vertex).getRoom().getId() != null)) {
+				if ((vertex instanceof VertexRoom) && (((VertexRoom) vertex).getRoom() != null)
+						&& (((VertexRoom) vertex).getRoom().getId() != null)) {
 					removedVertexes.add(vertex);
 				}
 				LOG.debug("VERTEX_REMOVED : {}", vertex);
@@ -86,24 +97,20 @@ public class VertexAndEdgeControl implements GraphEventListener<Vertex, Unit<Edg
 	// =================================================================================================================
 	// Methods
 	// =================================================================================================================
-	private void detectVirtualAction(Graph<Vertex, Unit<Edge>> graph, Edge edge) {
-		Pair<Vertex> pair = graph.getEndpoints(edge);
-		if ((pair.getFirst() instanceof VertexSpecial) || (pair.getSecond() instanceof VertexSpecial)) {
-			edge.setVirtualAction(true);
-		}
-	}
-
-	private void setRoomHeader(Graph<Vertex, Unit<Edge>> graph, Edge edge) {
+	private void createEdge(Graph<Vertex, Unit<Edge>> graph, Unit<Edge> edge) {
 		Pair<Vertex> pair = graph.getEndpoints(edge);
 		Vertex src = graph.isSource(pair.getFirst(), edge) ? pair.getFirst() : pair.getSecond();
 		Vertex dst = graph.isDest(pair.getFirst(), edge) ? pair.getFirst() : pair.getSecond();
-		if (src instanceof VertexRoom) {
-			edge.getAction().setCurrentRoom(((VertexRoom) src).getRoom());
+
+		if (dst instanceof VertexFinish) {
+			edge.setValue(new EdgeFinish());
+		} else if (src instanceof VertexStart) {
+			edge.setValue(new EdgeStart(null));
+		} else {
+			EdgeAction edgeAction = new EdgeAction(null);
+			edgeAction.setKey('-');
+			edge.setValue(edgeAction);
 		}
-		if (dst instanceof VertexRoom) {
-			edge.getAction().setNextRoom(((VertexRoom) dst).getRoom());
-		}
-		edge.setKey("-");
 	}
 
 	// =================================================================================================================
