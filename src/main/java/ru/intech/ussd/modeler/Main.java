@@ -129,10 +129,10 @@ public class Main {
  		vv.getRenderContext().setVertexIconTransformer(new RoomVertexIconTranformer(vv.getPickedVertexState()));
 
 
-        PickedState<Edge> pes = vv.getPickedEdgeState();
-        vv.getRenderContext().setEdgeDrawPaintTransformer(new PickableEdgePaintTransformer<Edge>(pes, Color.black, Color.cyan));
-        vv.getRenderContext().setArrowDrawPaintTransformer(new PickableEdgePaintTransformer<Edge>(pes, Color.black, Color.cyan));
-        vv.getRenderContext().setArrowFillPaintTransformer(new PickableEdgePaintTransformer<Edge>(pes, Color.black, Color.cyan));
+        PickedState<Unit<Edge>> pes = vv.getPickedEdgeState();
+        vv.getRenderContext().setEdgeDrawPaintTransformer(new PickableEdgePaintTransformer<Unit<Edge>>(pes, Color.black, Color.cyan));
+        vv.getRenderContext().setArrowDrawPaintTransformer(new PickableEdgePaintTransformer<Unit<Edge>>(pes, Color.black, Color.cyan));
+        vv.getRenderContext().setArrowFillPaintTransformer(new PickableEdgePaintTransformer<Unit<Edge>>(pes, Color.black, Color.cyan));
 
         // Set up a new stroke Transformer for the edges
         float dash[] = {10.0f};
@@ -148,7 +148,7 @@ public class Main {
 
         // add my listeners for ToolTips
         vv.setVertexToolTipTransformer(new ToStringLabeller<Vertex>());
-        vv.setEdgeToolTipTransformer(new ToStringLabeller<Edge>());
+        vv.setEdgeToolTipTransformer(new ToStringLabeller<Unit<Edge>>());
 
 
         final ScalingControl scaler = new CrossoverScalingControl();

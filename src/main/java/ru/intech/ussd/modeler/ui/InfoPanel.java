@@ -15,8 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.intech.ussd.modeler.dao.UssdDaoManager;
-import ru.intech.ussd.modeler.entities.Param;
-import ru.intech.ussd.modeler.entities.RoomBody;
 import ru.intech.ussd.modeler.entities.Room;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
