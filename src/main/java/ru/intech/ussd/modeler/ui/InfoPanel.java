@@ -17,6 +17,9 @@ import org.slf4j.LoggerFactory;
 import ru.intech.ussd.modeler.dao.UssdDaoManager;
 import ru.intech.ussd.modeler.entities.Room;
 import ru.intech.ussd.modeler.graphobjects.Edge;
+import ru.intech.ussd.modeler.graphobjects.EdgeAction;
+import ru.intech.ussd.modeler.graphobjects.EdgeFinish;
+import ru.intech.ussd.modeler.graphobjects.EdgeStart;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 
 public class InfoPanel extends JPanel {
@@ -110,13 +113,30 @@ public class InfoPanel extends JPanel {
 		editObject = edge;
 		lblNameOrDescription.setText("Описание : ");
 		lblFunctionOrKey.setText("Ключ : ");
-		txtId.setText(String.valueOf(edge.getAction().getId()));
-		txtNameOrDesription.setText(edge.getAction().getDescription());
-		txtNameOrDesription.setEditable(!edge.isVirtualActon());
-		txtFunctionOrKey.setText(edge.getKey());
-		if (edge.isVirtualActon()) {
-			// txtFunctionOrKey.set
+		if (edge instanceof EdgeFinish) {
+			txtId.setText("none");
+			txtNameOrDesription.setText("virtual edge");
+			txtNameOrDesription.setEditable(false);
+			txtFunctionOrKey.setText("-");
+			txtFunctionOrKey.setEditable(false);
 		}
+		if (edge instanceof EdgeStart) {
+			EdgeStart edgeStart = (EdgeStart) edge;
+			txtId.setText(edgeStart.getEntryPoint() == null ? "null" : String.valueOf(edgeStart.getEntryPoint().getId()));
+			txtNameOrDesription.setText(edgeStart.getDescription());
+			txtNameOrDesription.setEditable(true);
+			txtFunctionOrKey.setText(edgeStart.getKey());
+			txtFunctionOrKey.setEditable(true);
+		}
+		if (edge instanceof EdgeAction) {
+			EdgeAction edgeAction = (EdgeAction) edge;
+			txtId.setText(edgeAction.getAction() == null ? "null" : String.valueOf(edgeAction.getAction().getId()));
+			txtNameOrDesription.setText(edgeAction.getDescription());
+			txtNameOrDesription.setEditable(true);
+			txtFunctionOrKey.setText(String.valueOf(edgeAction.getKey()));
+			txtFunctionOrKey.setEditable(true);
+		}
+
 		((CardLayout) getLayout()).show(this, INPUT_FORM);
 	}
 
@@ -145,17 +165,6 @@ public class InfoPanel extends JPanel {
 
 		((CardLayout) getLayout()).show(this, INPUT_FORM);
 
-	}
-
-	private RoomBody findRoomBodyWithFunction(Room rh) {
-		RoomBody rb = null;
-		for (RoomBody it : rh.getRoomBodies()) {
-			if ("func".equalsIgnoreCase(it.getParam().getName())) {
-				rb = it;
-				break;
-			}
-		}
-		return rb;
 	}
 
 	public void saveChanges() {
