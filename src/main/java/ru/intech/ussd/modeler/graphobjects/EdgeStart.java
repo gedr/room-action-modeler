@@ -28,7 +28,7 @@ public class EdgeStart implements Edge{
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
 	public boolean isChanged() {
-		return entryPoint == null ? true: (StringUtils.equals(getKey(), entryPoint.getUserMessage())
+		return entryPoint == null ? true : !(StringUtils.equals(getKey(), entryPoint.getUserMessage())
 				&& StringUtils.equals(getDescription(), entryPoint.getDescription()));
 	}
 
@@ -56,7 +56,7 @@ public class EdgeStart implements Edge{
 		this.entryPoint = entryPoint;
 		if (entryPoint != null) {
 			setKey(entryPoint.getUserMessage());
-			setDescription(getDescription());
+			setDescription(entryPoint.getDescription());
 		}
 	}
 

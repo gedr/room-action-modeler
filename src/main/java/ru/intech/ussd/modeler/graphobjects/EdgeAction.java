@@ -27,7 +27,7 @@ public class EdgeAction implements Edge {
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
 	public boolean isChanged() {
-		return action == null ? true: ((getKey() == action.getKey())
+		return action == null ? true : !((getKey() == action.getKey())
 				&& StringUtils.equals(getDescription(), action.getDescription()));
 	}
 
@@ -51,6 +51,10 @@ public class EdgeAction implements Edge {
 
 	public void setAction(Action action) {
 		this.action = action;
+		if (action != null) {
+			setKey(action.getKey());
+			setDescription(action.getDescription());
+		}
 	}
 
 	public String getDescription() {

@@ -1,9 +1,15 @@
 package ru.intech.ussd.modeler.services;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.intech.ussd.modeler.dao.UssdDaoManager;
 import ru.intech.ussd.modeler.entities.Action;
@@ -23,10 +29,10 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 
 public class GraphService {
-
 	// =================================================================================================================
 	// Constants
 	// =================================================================================================================
+	private static final Logger LOG = LoggerFactory.getLogger(GraphService.class);
 
 	// =================================================================================================================
 	// Fields
@@ -106,7 +112,7 @@ public class GraphService {
 
 	private static Vertex findVertex(Room room, Graph<Vertex, Unit<Edge>> grap) {
 		for (Vertex it : grap.getVertices()) {
-			if ((it instanceof VertexRoom) && room.equals(((VertexRoom)it).getRoom())) {
+			if ((it instanceof VertexRoom) && room.equals(((VertexRoom) it).getRoom())) {
 				return it;
 			}
 		}
@@ -156,9 +162,51 @@ public class GraphService {
 		}
 	}
 
-	public static void saveGraph(Graph<Vertex, Unit<Edge>> graph) {
+	public static void saveGraph(Graph<Vertex, Unit<Edge>> graph, boolean ignoreWarnings) {
+		List<Triple<Boolean, String, Object>> lst = checkGraph(graph);
+		for (Triple<Boolean, String, Object> t : lst) {
+			if (t.getLeft() || (ignoreWarnings && !t.getLeft())) {
+				throw new IllegalStateException("graph have errors");
+			}
+		}
+		String service = findService(graph);
+		markVertexBeforeFinish(graph);
 		saveVertexes(graph);
-		saveEdges(graph);
+		saveEdges(graph, service);
+	}
+
+	private static String findService(Graph<Vertex, Unit<Edge>> graph) {
+		for (Unit<Edge> uedge : graph.getEdges()) {
+			if (uedge != null) {
+				if (uedge.getValue() instanceof EdgeStart) {
+					EdgeStart es = (EdgeStart) uedge.getValue();
+					if ((es.getEntryPoint() != null) && !StringUtils.isBlank(es.getEntryPoint().getService())) {
+						return es.getEntryPoint().getService();
+					}
+				}
+				if (uedge.getValue() instanceof EdgeAction) {
+					EdgeAction ea = (EdgeAction) uedge.getValue();
+					if ((ea.getAction() != null) && !StringUtils.isBlank(ea.getAction().getService())) {
+						return ea.getAction().getService();
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	private static void markVertexBeforeFinish(Graph<Vertex, Unit<Edge>> graph) {
+		for (Vertex v : graph.getVertices()) {
+			if (v instanceof VertexFinish) {
+				for (Unit<Edge> e : graph.getInEdges(v)) {
+					Vertex vi = graph.getOpposite(v, e);
+					if (vi instanceof VertexRoom) {
+						((VertexRoom) vi).setFinish(true);
+					}
+				}
+				break;
+			}
+		}
 	}
 
 	private static void saveVertexes(Graph<Vertex, Unit<Edge>> graph) {
@@ -175,12 +223,102 @@ public class GraphService {
 		}
 	}
 
-	private static void saveEdges(Graph<Vertex, Unit<Edge>> graph) {
+	private static void saveEdges(Graph<Vertex, Unit<Edge>> graph, String service) {
 		for (Unit<Edge> uedge : graph.getEdges()) {
+			if ((uedge == null) || (uedge.getValue() == null)) {
+				LOG.error("graph contain null edge");
+				continue;
+			}
+			if (uedge.getValue().isChanged()) {
+				uedge.getValue().applyChanges();
+				saveEdgeStart(graph, uedge, service);
+				saveEdgeAction(graph, uedge, service);
+			}
+		}
+	}
+
+	private static void saveEdgeStart(Graph<Vertex, Unit<Edge>> graph, Unit<Edge> uedge, String service) {
+		if (uedge.getValue() instanceof EdgeStart) {
+			EntryPoint ep = ((EdgeStart) uedge.getValue()).getEntryPoint();
+			if (ep.getId() != null) {
+				UssdDaoManager.updateEntryPoint(ep);
+			} else {
+				VertexRoom dst = (VertexRoom) graph.getDest(uedge);
+				ep.setRoom(dst.getRoom());
+				ep.setService(service);
+				UssdDaoManager.saveEntryPoint(ep);
+			}
+		}
+	}
+
+	private static void saveEdgeAction(Graph<Vertex, Unit<Edge>> graph, Unit<Edge> uedge, String service) {
+		if (uedge.getValue() instanceof EdgeAction) {
+			Action a = ((EdgeAction) uedge.getValue()).getAction();
+			if (a.getId() != null) {
+				UssdDaoManager.updateAction(a);
+			} else {
+				VertexRoom src = (VertexRoom) graph.getSource(uedge);
+				VertexRoom dst = (VertexRoom) graph.getDest(uedge);
+				a.setCurrentRoom(src.getRoom());
+				a.setNextRoom(dst.getRoom());
+				a.setService(service);
+				UssdDaoManager.saveAction(a);
+			}
+		}
+	}
+
+	public static List<Triple<Boolean, String, Object>> checkGraph(Graph<Vertex, Unit<Edge>> graph) {
+		List<Triple<Boolean, String, Object>> lst = new ArrayList<Triple<Boolean, String, Object>>();
+		lst.addAll(checkVertexes(graph));
+		lst.addAll(checkEdges(graph));
+		LOG.info(lst.toString());
+		return lst;
+	}
+
+	private static List<Triple<Boolean, String, Object>> checkVertexes(Graph<Vertex, Unit<Edge>> graph) {
+		List<Triple<Boolean, String, Object>> lst = new ArrayList<Triple<Boolean, String, Object>>();
+
+		for (Vertex vertex : graph.getVertices()) {
+			if (vertex instanceof VertexRoom ) {
+				VertexRoom vr = (VertexRoom) vertex;
+				if (StringUtils.isBlank(vr.getDescription())) {
+					lst.add(Triple.of(false, "ПРЕДУПРЕЖДЕНИЕ: у вершины нет описания", (Object) vr));
+				}
+				if (StringUtils.isBlank(vr.getFunction())) {
+					lst.add(Triple.of(true, "ОШИБКА: у вершины нет функции", (Object) vr));
+				}
+			}
+		}
+		return lst;
+	}
+
+	private static List<Triple<Boolean, String, Object>> checkEdges(Graph<Vertex, Unit<Edge>> graph) {
+		List<Triple<Boolean, String, Object>> lst = new ArrayList<Triple<Boolean, String, Object>>();
+
+		for (Unit<Edge> uedge : graph.getEdges()) {
+			if ((uedge == null) || (uedge.getValue() == null)) {
+					lst.add(Triple.of(true, "ОШИБКА: NULL ребро", (Object) uedge));
+				continue;
+			}
+			if (uedge.getValue() instanceof EdgeStart) {
+				EdgeStart es = (EdgeStart) uedge.getValue();
+				if (StringUtils.isBlank(es.getKey())) {
+					lst.add(Triple.of(true, "ОШИБКА: в стартовом ребре нет ключа перехода", (Object) uedge));
+				}
+				if (StringUtils.isBlank(es.getDescription())) {
+					lst.add(Triple.of(false, "ПРЕДУПРЕЖДЕНИЕ: у стартового ребра нет описания", (Object) uedge));
+				}
+			}
+
+			if ((uedge.getValue() instanceof EdgeAction)
+					&& StringUtils.isBlank(((EdgeAction) uedge.getValue()).getDescription())) {
+				lst.add(Triple.of(false, "ПРЕДУПРЕЖДЕНИЕ: у ребра нет описания", (Object) uedge));
+			}
 
 		}
-
+		return lst;
 	}
+
 
 	// =================================================================================================================
 	// Inner and Anonymous Classes

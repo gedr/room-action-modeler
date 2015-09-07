@@ -18,6 +18,7 @@ import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
+import javax.swing.JSeparator;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
@@ -154,8 +155,8 @@ public class Main {
         final ScalingControl scaler = new CrossoverScalingControl();
 
 
-        JButton plus = new JButton("+");
-        plus.addActionListener(new ActionListener() {
+        JButton btnPlus = new JButton("+");
+        btnPlus.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	width *= K;
             	height *= K;
@@ -164,8 +165,8 @@ public class Main {
                 System.out.println("dimension [ " + width + ", " + height + " ]");
             }
         });
-        JButton minus = new JButton("-");
-        minus.addActionListener(new ActionListener() {
+        JButton btnMinus = new JButton("-");
+        btnMinus.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	width /= K;
             	height /= K;
@@ -174,10 +175,47 @@ public class Main {
                 System.out.println("dimension [ " + width + ", " + height + " ]");
             }
         });
+        JButton btnSave = new JButton("save");
+        btnSave.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				GraphService.saveGraph(g, false);
+			}
+		});
+        JButton btnCheck = new JButton("check");
+        btnCheck.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				GraphService.checkGraph(g);
+			}
+		});
+        JButton btnDelete = new JButton("delete");
+        btnDelete.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				for (Vertex v : vv.getPickedVertexState().getPicked()) {
+					g.removeVertex(v);
+				}
+				for (Unit<Edge> ue : vv.getPickedEdgeState().getPicked()) {
+					g.removeEdge(ue);
+				}
+				vv.revalidate();
+				vv.repaint();
+			}
+		});
+
+
+
+
 
         JToolBar toolBar = new JToolBar();
-        toolBar.add(plus);
-        toolBar.add(minus);
+        toolBar.add(btnPlus);
+        toolBar.add(btnMinus);
+        toolBar.add(new JSeparator());
+        toolBar.add(btnDelete);
+        toolBar.add(new JSeparator());
+        toolBar.add(btnSave);
+        toolBar.add(btnCheck);
 
         System.out.println(vv.getLayout());
 
@@ -190,7 +228,9 @@ public class Main {
 					SwingUtilities.invokeLater(new Runnable() {
 
 						public void run() {
-							infoPanel.showEdge((Edge) e.getItem());
+							@SuppressWarnings("unchecked")
+							Unit<Edge> ue = (Unit<Edge>) e.getItem();
+							infoPanel.showEdge(ue.getValue());
 						}
 					});
 				}

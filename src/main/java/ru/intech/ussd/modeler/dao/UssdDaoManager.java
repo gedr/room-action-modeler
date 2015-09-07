@@ -47,7 +47,7 @@ public class UssdDaoManager {
 	// Methods
 	// =================================================================================================================
 	public static List<EntryPoint> loadEntryPointByService(String service) {
-		String hsql = "select ep from EntryPoint as ep inner join fetch ep.room where ep.service = :service";
+		String hsql = "SELECT ep FROM EntryPoint AS ep INNER JOIN FETCH ep.room WHERE ep.service = :service";
 		try {
 			return ussd.executeAndGetResultList(QUERY_LANG.HSQL, hsql,
 					OrmHelper.QueryAttrs.build().setParam("service", service));
@@ -58,7 +58,8 @@ public class UssdDaoManager {
 	}
 
 	public static List<Action> loadActionByService(String service) {
-		String hsql = "select a from Action as a inner join fetch a.currentRoom inner join fetch a.nextRoom where a.service = :service";
+		String hsql = "SELECT a FROM Action AS a INNER JOIN FETCH a.currentRoom INNER JOIN FETCH a.nextRoom "
+				+ " WHERE a.service = :service";
 		try {
 			return ussd.executeAndGetResultList(QUERY_LANG.HSQL, hsql,
 					OrmHelper.QueryAttrs.build().setParam("service", service));
@@ -111,6 +112,7 @@ public class UssdDaoManager {
 	}
 
 	public static void saveRoom(Room room) {
+		LOG.info("saveRoom({})", room);
 		Validate.notNull(room);
 		try {
 			ussd.save(room);
@@ -120,10 +122,53 @@ public class UssdDaoManager {
 	}
 
 	public static void updateRoom(Room room) {
+		LOG.info("updateRoom({})", room);
 		Validate.notNull(room);
 		Validate.notNull(room.getId());
 		try {
 			ussd.update(room);
+		} catch (Throwable e) {
+			LOG.error("updateRoom failed : ", e);
+		}
+	}
+
+	public static void saveEntryPoint(EntryPoint ep) {
+		LOG.info("saveEntryPoint({})", ep);
+		Validate.notNull(ep);
+		try {
+			ussd.save(ep);
+		} catch (Throwable e) {
+			LOG.error("saveRoom failed : ", e);
+		}
+	}
+
+	public static void updateEntryPoint(EntryPoint ep) {
+		LOG.info("updateEntryPoint({})", ep);
+		Validate.notNull(ep);
+		Validate.notNull(ep.getId());
+		try {
+			ussd.update(ep);
+		} catch (Throwable e) {
+			LOG.error("updateRoom failed : ", e);
+		}
+	}
+
+	public static void saveAction(Action a) {
+		LOG.info("saveAction({})", a);
+		Validate.notNull(a);
+		try {
+			ussd.save(a);
+		} catch (Throwable e) {
+			LOG.error("saveRoom failed : ", e);
+		}
+	}
+
+	public static void updateAction(Action a) {
+		LOG.info("updateAction({})", a);
+		Validate.notNull(a);
+		Validate.notNull(a.getId());
+		try {
+			ussd.update(a);
 		} catch (Throwable e) {
 			LOG.error("updateRoom failed : ", e);
 		}

@@ -42,12 +42,12 @@ public class VertexIcon implements Icon {
 		label.setFont(label.getFont().deriveFont(Main.fontSize));
 
 		if (vertex instanceof VertexStart) {
-			label.setText("start");
+			label.setText(SpecialVertexName.start);
 			label.setBackground(new Color(picked ?  X11Colors.LIME : X11Colors.LIME_GREEN));
 			label.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 		}
 		if (vertex instanceof VertexFinish) {
-			label.setText("finish");
+			label.setText(SpecialVertexName.finish);
 			label.setBackground(new Color(picked ?  X11Colors.OLIVE : X11Colors.OLIVE_DRAB));
 			label.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 		}

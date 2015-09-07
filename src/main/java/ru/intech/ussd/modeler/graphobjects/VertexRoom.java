@@ -53,7 +53,7 @@ public class VertexRoom implements Vertex {
 	};
 
 	public boolean isChanged() {
-		return room == null ? true: (StringUtils.equals(getDescription(), room.getDescription())
+		return room == null ? true : !(StringUtils.equals(getDescription(), room.getDescription())
 				&& StringUtils.equals(getFunction(), room.getFunction()) && (isFinish() == room.isFinish()));
 	}
 

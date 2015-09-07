@@ -3,30 +3,26 @@ package ru.intech.ussd.modeler.ui;
 import java.awt.CardLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 
-import ru.intech.ussd.modeler.dao.UssdDaoManager;
-import ru.intech.ussd.modeler.entities.Room;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.EdgeAction;
 import ru.intech.ussd.modeler.graphobjects.EdgeFinish;
 import ru.intech.ussd.modeler.graphobjects.EdgeStart;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
+import ru.intech.ussd.modeler.graphobjects.VertexRoom;
+import ru.intech.ussd.modeler.graphobjects.VertexSpecial;
+import ru.intech.ussd.modeler.graphobjects.VertexStart;
 
 public class InfoPanel extends JPanel {
 	// =================================================================================================================
 	// Constants
 	// =================================================================================================================
-	private static final Logger LOG = LoggerFactory.getLogger(InfoPanel.class);
 	private static final long serialVersionUID = 1L;
 
 	private static final String EMPTY_FORM = "empty";
@@ -145,26 +141,22 @@ public class InfoPanel extends JPanel {
 		editObject = vertex;
 		lblNameOrDescription.setText("Описание : ");
 		lblFunctionOrKey.setText("Функция : ");
-		if (vertex.getObject() instanceof String) {
+		if (vertex instanceof VertexSpecial) {
 			txtId.setText("none");
-			txtNameOrDesription.setText((String) vertex.getObject());
+			txtNameOrDesription.setText(vertex instanceof VertexStart ? SpecialVertexName.start : SpecialVertexName.finish);
 			txtNameOrDesription.setEditable(false);
-			txtFunctionOrKey.setText("");
+			txtFunctionOrKey.setText("none");
 			txtFunctionOrKey.setEditable(false);
 		}
-
-		if (vertex.getObject() instanceof Room) {
-			Room rh = (Room) vertex.getObject();
-			RoomBody rb = findRoomBodyWithFunction(rh);
-			txtId.setText(String.valueOf(rh.getId()));
-			txtNameOrDesription.setText(rh.getDescription());
+		if (vertex instanceof VertexRoom) {
+			VertexRoom vr = (VertexRoom) vertex;
+			txtId.setText(vr.getRoom() == null ? "null" : String.valueOf(vr.getRoom().getId()));
+			txtNameOrDesription.setText(vr.getDescription());
 			txtNameOrDesription.setEditable(true);
-			txtFunctionOrKey.setText(rb == null ? "none" : rb.getValue());
+			txtFunctionOrKey.setText(vr.getFunction());
 			txtFunctionOrKey.setEditable(true);
 		}
-
 		((CardLayout) getLayout()).show(this, INPUT_FORM);
-
 	}
 
 	public void saveChanges() {
@@ -175,44 +167,27 @@ public class InfoPanel extends JPanel {
 	}
 
 	private void saveVertex() {
-		if (editObject instanceof Vertex) {
-			Vertex vertex = (Vertex) editObject;
-			if (vertex.getObject() instanceof Room) {
-				Room rh = (Room) vertex.getObject();
-				rh.setDescription(txtNameOrDesription.getText());
-				saveRoomBody(rh);
-			}
+		if (editObject instanceof VertexRoom) {
+			VertexRoom vr = (VertexRoom) editObject;
+			vr.setDescription(txtNameOrDesription.getText());
+			vr.setFunction(txtFunctionOrKey.getText());
 		}
-	}
-
-	private void saveRoomBody(Room rh) {
-		RoomBody rb = findRoomBodyWithFunction(rh);
-		if (rb == null) {
-			LOG.debug("new RoomBody for {}", rh);
-			Param param = UssdDaoManager.loadParamByName("func");
-			Validate.notNull(param);
-
-			rb = new RoomBody();
-			rb.setRoomHeader(rh);
-			rb.setParam(param);
-
-			Set<RoomBody> set = rh.getRoomBodies();
-			if (set == null) {
-				set = new HashSet<RoomBody>();
-				rh.setRoomBodies(set);
-			}
-			set.add(rb);
-		}
-		rb.setValue(txtFunctionOrKey.getText());
 	}
 
 	private void saveEdge() {
-		if (editObject instanceof Edge) {
-			Edge edge = (Edge) editObject;
-			edge.setKey(txtFunctionOrKey.getText());
-			if (!edge.isVirtualActon()) {
-				edge.getAction().setDescription(txtNameOrDesription.getText());
+		if (editObject instanceof EdgeStart) {
+			EdgeStart es = (EdgeStart) editObject;
+			if (!StringUtils.isBlank(txtFunctionOrKey.getText())) {
+				es.setKey(txtFunctionOrKey.getText());
 			}
+			es.setDescription(txtNameOrDesription.getText());
+		}
+		if (editObject instanceof EdgeAction) {
+			EdgeAction ea = (EdgeAction) editObject;
+			if (!StringUtils.isEmpty(txtFunctionOrKey.getText())) {
+				ea.setKey(txtFunctionOrKey.getText().charAt(0));
+			}
+			ea.setDescription(txtNameOrDesription.getText());
 		}
 	}
 
