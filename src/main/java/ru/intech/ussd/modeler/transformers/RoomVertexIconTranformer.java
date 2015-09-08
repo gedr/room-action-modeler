@@ -4,6 +4,7 @@ import javax.swing.Icon;
 
 import org.apache.commons.collections15.Transformer;
 
+import ru.intech.ussd.modeler.config.GraphConfig;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.ui.VertexIcon;
 import edu.uci.ics.jung.visualization.picking.PickedState;
@@ -17,19 +18,21 @@ public class RoomVertexIconTranformer implements Transformer<Vertex, Icon> {
 	// Fields
 	// =================================================================================================================
 	private PickedState<Vertex> pickedState;
+	private GraphConfig config;
 
 	// =================================================================================================================
 	// Constructors
 	// =================================================================================================================
-	public RoomVertexIconTranformer(PickedState<Vertex> pickedState) {
+	public RoomVertexIconTranformer(PickedState<Vertex> pickedState, GraphConfig config) {
 		this.pickedState = pickedState;
+		this.config = config;
 	}
 
 	// =================================================================================================================
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
 	public Icon transform(Vertex vertex) {
-		return new VertexIcon(vertex, pickedState == null ? false : pickedState.isPicked(vertex));
+		return new VertexIcon(vertex, pickedState == null ? false : pickedState.isPicked(vertex), config);
 	}
 
 	// =================================================================================================================

@@ -10,7 +10,7 @@ public class MainFrame extends JFrame {
 	// Constants
 	// =================================================================================================================
 	public MainFrame() {
-		setTitle("Graph View");
+		setTitle("Ussd graph editor");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 	}

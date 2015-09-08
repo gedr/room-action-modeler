@@ -1,6 +1,5 @@
 package ru.intech.ussd.modeler.ui;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -12,6 +11,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 
 import ru.intech.ussd.modeler.Main;
+import ru.intech.ussd.modeler.config.GraphConfig;
 import ru.intech.ussd.modeler.entities.Room;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.graphobjects.VertexFinish;
@@ -26,48 +26,55 @@ public class VertexIcon implements Icon {
 	// =================================================================================================================
 	// Fields
 	// =================================================================================================================
-	private BufferedImage bi ;
+	private int iconWidth;
+	private int iconHeight;
+	private double scale = 1.0;
+	private GraphConfig config;
+	private Vertex vertex;
+	boolean picked;
 
 	// =================================================================================================================
 	// Constructors
 	// =================================================================================================================
-	public VertexIcon(Vertex vertex, boolean picked) {
-		JLabel label = new JLabel();
-		label.setOpaque(true);
-		label.setDoubleBuffered(false);
-		label.setSize((int) Math.round(Main.width), (int) Math.round(Main.height));
-
-		label.setHorizontalAlignment(SwingConstants.CENTER);
-		label.setVerticalAlignment(SwingConstants.CENTER);
-		label.setFont(label.getFont().deriveFont(Main.fontSize));
-
-		if (vertex instanceof VertexStart) {
-			label.setText(SpecialVertexName.start);
-			label.setBackground(new Color(picked ?  X11Colors.LIME : X11Colors.LIME_GREEN));
-			label.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
-		}
-		if (vertex instanceof VertexFinish) {
-			label.setText(SpecialVertexName.finish);
-			label.setBackground(new Color(picked ?  X11Colors.OLIVE : X11Colors.OLIVE_DRAB));
-			label.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
-		}
-		if (vertex instanceof VertexRoom) {
-			Room room = ((VertexRoom) vertex).getRoom();
-			String text = "<html><center>Room(" + (room == null ? "null" : String.valueOf(room.getId()))
-					+ ")<br>" + ((VertexRoom) vertex).getDescription() + "</center></html>";
-			label.setText(text);
-			label.setBackground(new Color(picked ? X11Colors.DEEP_SKY_BLUE : X11Colors.SKY_BLUE));
-			label.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
-		}
-		bi = new BufferedImage((int) Math.round(Main.width), (int) Math.round(Main.height), BufferedImage.TYPE_INT_ARGB);
-		Graphics g = bi.createGraphics();
-		label.paint(g);
+	public VertexIcon(Vertex vertex, boolean picked, GraphConfig config, int iconWidth, int iconHeight, double scale) {
+		this.vertex = vertex;
+		this.picked = picked;
+		this.config = config;
+		this.iconWidth = iconWidth;
+		this.iconHeight = iconHeight;
+		this.scale = scale;
 	}
 
 	// =================================================================================================================
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
 	public void paintIcon(Component c, Graphics g, int x, int y) {
+		JLabel label = new JLabel();
+		label.setOpaque(true);
+		label.setDoubleBuffered(false);
+		label.setHorizontalAlignment(SwingConstants.CENTER);
+		label.setVerticalAlignment(SwingConstants.CENTER);
+		label.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
+		label.setSize((int) Math.round(iconWidth * scale), (int) Math.round(iconHeight * scale));
+		label.setFont(config.getRoomFont().deriveFont((float) (config.getRoomFont().getSize() * scale)));
+
+		if (vertex instanceof VertexStart) {
+			label.setText(SpecialVertexName.start);
+			label.setBackground(picked ? config.getColorPickedStartRoom() : config.getColorUnpickedStartRoom());
+		}
+		if (vertex instanceof VertexFinish) {
+			label.setText(SpecialVertexName.finish);
+			label.setBackground(picked ? config.getColorPickedFinishRoom() : config.getColorUnpickedFinishRoom());
+		}
+		if (vertex instanceof VertexRoom) {
+			Room room = ((VertexRoom) vertex).getRoom();
+			String text = "<html><center>Room(" + (room == null ? "null" : String.valueOf(room.getId()))
+					+ ")<br>" + ((VertexRoom) vertex).getDescription() + "</center></html>";
+			label.setText(text);
+			label.setBackground(picked ? config.getColorPickedRoom() : config.getColorUnpickedRoom());
+		}
+		BufferedImage bi = new BufferedImage(label.getWidth(), label.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		label.paint(bi.createGraphics());
 		g.drawImage(bi, x, y, null);
 	}
 
@@ -82,6 +89,48 @@ public class VertexIcon implements Icon {
 	// =================================================================================================================
 	// Getter & Setter
 	// =================================================================================================================
+	public void setIconWidth(int iconWidth) {
+		this.iconWidth = iconWidth;
+	}
+
+	public void setIconHeight(int iconHeight) {
+		this.iconHeight = iconHeight;
+	}
+
+	public double getScale() {
+		return scale;
+	}
+
+	public void setScale(double scale) {
+		this.scale = scale;
+	}
+
+	public GraphConfig getConfig() {
+		if (config == null) {
+			config = new GraphConfig();
+		}
+		return config;
+	}
+
+	public void setConfig(GraphConfig config) {
+		this.config = config;
+	}
+
+	public Vertex getVertex() {
+		return vertex;
+	}
+
+	public void setVertex(Vertex vertex) {
+		this.vertex = vertex;
+	}
+
+	public boolean isPicked() {
+		return picked;
+	}
+
+	public void setPicked(boolean picked) {
+		this.picked = picked;
+	}
 
 	// =================================================================================================================
 	// Methods

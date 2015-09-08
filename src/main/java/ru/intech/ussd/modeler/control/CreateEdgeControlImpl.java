@@ -1,6 +1,7 @@
 package ru.intech.ussd.modeler.control;
 
-import javax.swing.JFrame;
+import java.awt.Component;
+
 import javax.swing.JOptionPane;
 
 import ru.intech.ussd.modeler.graphobjects.Edge;
@@ -20,14 +21,14 @@ public class CreateEdgeControlImpl implements CreateEdgeControl<Vertex> {
 	// =================================================================================================================
 	// Fields
 	// =================================================================================================================
-	private JFrame frame;
+	private Component  parent;
 	private Graph<Vertex, Unit<Edge>> graph;
 
 	// =================================================================================================================
 	// Constructors
 	// =================================================================================================================
-	public CreateEdgeControlImpl(JFrame frame, Graph<Vertex, Unit<Edge>> graph) {
-		this.frame = frame;
+	public CreateEdgeControlImpl(Component parent, Graph<Vertex, Unit<Edge>> graph) {
+		this.parent = parent;
 		this.graph = graph;
 	}
 
@@ -44,12 +45,12 @@ public class CreateEdgeControlImpl implements CreateEdgeControl<Vertex> {
 	// =================================================================================================================
 	// Getter & Setter
 	// =================================================================================================================
-	public JFrame getFrame() {
-		return frame;
+	public Component getParent() {
+		return parent;
 	}
 
-	public void setFrame(JFrame frame) {
-		this.frame = frame;
+	public void setParent(Component parent) {
+		this.parent = parent;
 	}
 
 	public Graph<Vertex, Unit<Edge>> getGraph() {
@@ -65,9 +66,9 @@ public class CreateEdgeControlImpl implements CreateEdgeControl<Vertex> {
 	// =================================================================================================================
 	private boolean vetoEdgeBetweenStartAndFinishVertexes(EdgeType edgeType, Vertex startVertex, Vertex finsihVertex) {
 		if ((startVertex instanceof VertexSpecial) && (finsihVertex instanceof VertexSpecial)) {
-			JOptionPane.showMessageDialog(frame, "Невозможно соединить эти вершины", "Ошибка", JOptionPane.ERROR_MESSAGE);
-			frame.revalidate();
-			frame.repaint();
+			JOptionPane.showMessageDialog(parent, "Невозможно соединить эти вершины", "Ошибка", JOptionPane.ERROR_MESSAGE);
+			parent.revalidate();
+			parent.repaint();
 			return false;
 		}
 		return true;
@@ -75,10 +76,10 @@ public class CreateEdgeControlImpl implements CreateEdgeControl<Vertex> {
 
 	private boolean vetoVertexFinishNotBegin(EdgeType edgeType, Vertex startVertex) {
 		if (startVertex instanceof VertexFinish) {
-			JOptionPane.showMessageDialog(frame, "Финишная вершина не может быть начальной вершиной для ребра",
+			JOptionPane.showMessageDialog(parent, "Финишная вершина не может быть начальной вершиной для ребра",
 					"Ошибка", JOptionPane.ERROR_MESSAGE);
-			frame.revalidate();
-			frame.repaint();
+			parent.revalidate();
+			parent.repaint();
 			return false;
 		}
 		return true;
@@ -86,10 +87,10 @@ public class CreateEdgeControlImpl implements CreateEdgeControl<Vertex> {
 
 	private boolean vetoVertexStartNotEnd(EdgeType edgeType, Vertex finsihVertex) {
 		if (finsihVertex instanceof VertexStart) {
-			JOptionPane.showMessageDialog(frame, "Стартовая вершина не может быть конечной вершиной для ребра",
+			JOptionPane.showMessageDialog(parent, "Стартовая вершина не может быть конечной вершиной для ребра",
 					"Ошибка", JOptionPane.ERROR_MESSAGE);
-			frame.revalidate();
-			frame.repaint();
+			parent.revalidate();
+			parent.repaint();
 			return false;
 		}
 		return true;
@@ -98,13 +99,13 @@ public class CreateEdgeControlImpl implements CreateEdgeControl<Vertex> {
 	private boolean vetoEdgeAlreadyExists(EdgeType edgeType, Vertex startVertex, Vertex finsihVertex) {
 		for (Unit<Edge> uedge : graph.getOutEdges(startVertex)) {
 			if (graph.getOpposite(startVertex, uedge).equals(finsihVertex)) {
-				int res = JOptionPane.showConfirmDialog(frame, "Вершины уже соеденены. \n Добавить еще одно ?", "Вопрос",
+				int res = JOptionPane.showConfirmDialog(parent, "Вершины уже соеденены. \n Добавить еще одно ?", "Вопрос",
 						JOptionPane.YES_NO_OPTION);
 				if (JOptionPane.YES_OPTION == res) {
 					return true;
 				} else {
-					frame.revalidate();
-					frame.repaint();
+					parent.revalidate();
+					parent.repaint();
 					return false;
 				}
 			}

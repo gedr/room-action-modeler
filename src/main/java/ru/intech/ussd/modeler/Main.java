@@ -35,6 +35,7 @@ import ru.intech.ussd.modeler.entities.Room;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.graphobjects.VertexRoom;
+import ru.intech.ussd.modeler.graphobjects.VertexSpecial;
 import ru.intech.ussd.modeler.services.GraphService;
 import ru.intech.ussd.modeler.transformers.GraphToFlatTranformer;
 import ru.intech.ussd.modeler.transformers.RoomVertexIconTranformer;
@@ -73,7 +74,7 @@ public class Main {
 
 
 
-		final Graph<Vertex, Unit<Edge>> g =  new ObservableGraph<Vertex, Unit<Edge>>(GraphService.loadGraph("333"));
+		final Graph<Vertex, Unit<Edge>> g = new ObservableGraph<Vertex, Unit<Edge>>(GraphService.loadGraph("333"));
 
 
 		((ObservableGraph<Vertex, Unit<Edge>>)g).addGraphEventListener(new VertexAndEdgeControl());
@@ -194,7 +195,9 @@ public class Main {
 
 			public void actionPerformed(ActionEvent e) {
 				for (Vertex v : vv.getPickedVertexState().getPicked()) {
-					g.removeVertex(v);
+					if (!(v instanceof VertexSpecial)) {
+						g.removeVertex(v);
+					}
 				}
 				for (Unit<Edge> ue : vv.getPickedEdgeState().getPicked()) {
 					g.removeEdge(ue);
@@ -203,10 +206,6 @@ public class Main {
 				vv.repaint();
 			}
 		});
-
-
-
-
 
         JToolBar toolBar = new JToolBar();
         toolBar.add(btnPlus);
