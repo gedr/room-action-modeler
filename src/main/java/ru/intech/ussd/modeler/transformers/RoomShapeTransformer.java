@@ -1,15 +1,13 @@
 package ru.intech.ussd.modeler.transformers;
 
-import javax.swing.Icon;
+import java.awt.Shape;
+import java.awt.geom.Rectangle2D;
 
 import org.apache.commons.collections15.Transformer;
 
-import ru.intech.ussd.modeler.config.GraphConfig;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
-import ru.intech.ussd.modeler.ui.VertexIcon;
-import edu.uci.ics.jung.visualization.picking.PickedState;
 
-public class RoomVertexIconTranformer implements Transformer<Vertex, Icon> {
+public class RoomShapeTransformer implements Transformer<Vertex,Shape> {
 	// =================================================================================================================
 	// Constants
 	// =================================================================================================================
@@ -17,55 +15,81 @@ public class RoomVertexIconTranformer implements Transformer<Vertex, Icon> {
 	// =================================================================================================================
 	// Fields
 	// =================================================================================================================
-	private PickedState<Vertex> pickedState;
-	private GraphConfig config;
-	private double scale = 1.0;
+	private double width;
+	private double height;
+	private double scaleX;
+	private double scaleY;
+	private Rectangle2D shape;
 
 	// =================================================================================================================
 	// Constructors
 	// =================================================================================================================
-	public RoomVertexIconTranformer(PickedState<Vertex> pickedState, GraphConfig config) {
-		this.pickedState = pickedState;
-		this.config = config;
+	public RoomShapeTransformer(double width, double height) {
+		this.width = width;
+		this.height = height;
+		scaleX = scaleY = 1.0;
+		shape = new Rectangle2D.Double(-width/2, -height/2, width, height);
 	}
 
 	// =================================================================================================================
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
-	public Icon transform(Vertex vertex) {
-		return new VertexIcon(vertex, pickedState == null ? false : pickedState.isPicked(vertex), config, scale);
+	public Shape transform(Vertex input) {
+		return shape;
 	}
 
 	// =================================================================================================================
 	// Getter & Setter
 	// =================================================================================================================
-	public PickedState<Vertex> getPickedState() {
-		return pickedState;
+	public double getWidth() {
+		return width;
 	}
 
-	public void setPickedState(PickedState<Vertex> pickedState) {
-		this.pickedState = pickedState;
+	public void setWidth(double width) {
+		this.width = width;
+		setRect();
 	}
 
-	public GraphConfig getConfig() {
-		return config;
+	public double getHeight() {
+		return height;
 	}
 
-	public void setConfig(GraphConfig config) {
-		this.config = config;
+	public void setHeight(double height) {
+		this.height = height;
+		setRect();
 	}
 
-	public double getScale() {
-		return scale;
+	public double getScaleX() {
+		return scaleX;
 	}
 
-	public void setScale(double scale) {
-		this.scale = scale;
+	public void setScaleX(double scalex) {
+		this.scaleX = scalex;
+		setRect();
+	}
+
+	public double getScaleY() {
+		return scaleY;
+	}
+
+	public void setScaleY(double scaley) {
+		this.scaleY = scaley;
+		setRect();
 	}
 
 	// =================================================================================================================
 	// Methods
 	// =================================================================================================================
+	public void setScale(double scale) {
+		scaleX = scaleY = scale;
+		setRect();
+	}
+
+	private void setRect() {
+		double w = width * scaleX;
+		double h = height * scaleY;
+		shape.setRect(-w/2, -h/2, w, h);
+	}
 
 	// =================================================================================================================
 	// Inner and Anonymous Classes

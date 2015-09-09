@@ -10,7 +10,6 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 
-import ru.intech.ussd.modeler.Main;
 import ru.intech.ussd.modeler.config.GraphConfig;
 import ru.intech.ussd.modeler.entities.Room;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
@@ -26,8 +25,6 @@ public class VertexIcon implements Icon {
 	// =================================================================================================================
 	// Fields
 	// =================================================================================================================
-	private int iconWidth;
-	private int iconHeight;
 	private double scale = 1.0;
 	private GraphConfig config;
 	private Vertex vertex;
@@ -36,12 +33,10 @@ public class VertexIcon implements Icon {
 	// =================================================================================================================
 	// Constructors
 	// =================================================================================================================
-	public VertexIcon(Vertex vertex, boolean picked, GraphConfig config, int iconWidth, int iconHeight, double scale) {
+	public VertexIcon(Vertex vertex, boolean picked, GraphConfig config, double scale) {
 		this.vertex = vertex;
 		this.picked = picked;
 		this.config = config;
-		this.iconWidth = iconWidth;
-		this.iconHeight = iconHeight;
 		this.scale = scale;
 	}
 
@@ -55,7 +50,7 @@ public class VertexIcon implements Icon {
 		label.setHorizontalAlignment(SwingConstants.CENTER);
 		label.setVerticalAlignment(SwingConstants.CENTER);
 		label.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
-		label.setSize((int) Math.round(iconWidth * scale), (int) Math.round(iconHeight * scale));
+		label.setSize(getIconWidth(), getIconHeight());
 		label.setFont(config.getRoomFont().deriveFont((float) (config.getRoomFont().getSize() * scale)));
 
 		if (vertex instanceof VertexStart) {
@@ -69,7 +64,7 @@ public class VertexIcon implements Icon {
 		if (vertex instanceof VertexRoom) {
 			Room room = ((VertexRoom) vertex).getRoom();
 			String text = "<html><center>Room(" + (room == null ? "null" : String.valueOf(room.getId()))
-					+ ")<br>" + ((VertexRoom) vertex).getDescription() + "</center></html>";
+					+ ")<br/>" + ((VertexRoom) vertex).getDescription() + "</center></html>";
 			label.setText(text);
 			label.setBackground(picked ? config.getColorPickedRoom() : config.getColorUnpickedRoom());
 		}
@@ -79,24 +74,16 @@ public class VertexIcon implements Icon {
 	}
 
 	public int getIconWidth() {
-		return (int) Math.round(Main.width);
+		return (int) Math.round(getConfig().getRoomWidth() * scale);
 	}
 
 	public int getIconHeight() {
-		return (int) Math.round(Main.height);
+		return (int) Math.round(getConfig().getRoomHeight() * scale);
 	}
 
 	// =================================================================================================================
 	// Getter & Setter
 	// =================================================================================================================
-	public void setIconWidth(int iconWidth) {
-		this.iconWidth = iconWidth;
-	}
-
-	public void setIconHeight(int iconHeight) {
-		this.iconHeight = iconHeight;
-	}
-
 	public double getScale() {
 		return scale;
 	}

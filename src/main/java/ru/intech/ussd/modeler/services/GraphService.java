@@ -1,6 +1,7 @@
 package ru.intech.ussd.modeler.services;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -162,7 +163,8 @@ public class GraphService {
 		}
 	}
 
-	public static void saveGraph(Graph<Vertex, Unit<Edge>> graph, boolean ignoreWarnings) {
+	public static void saveGraph(Graph<Vertex, Unit<Edge>> graph, boolean ignoreWarnings, Collection<Vertex> vertexForDelete
+			, Collection<Edge> edgeForDelete) {
 		List<Triple<Boolean, String, Object>> lst = checkGraph(graph);
 		for (Triple<Boolean, String, Object> t : lst) {
 			if (t.getLeft() || (ignoreWarnings && !t.getLeft())) {
@@ -171,6 +173,8 @@ public class GraphService {
 		}
 		String service = findService(graph);
 		markVertexBeforeFinish(graph);
+		deleteEdges(edgeForDelete); // first delete operation
+		deleteVertexes(vertexForDelete); // second delete operation
 		saveVertexes(graph);
 		saveEdges(graph, service);
 	}
@@ -317,6 +321,46 @@ public class GraphService {
 
 		}
 		return lst;
+	}
+
+	private static void deleteEdges(Collection<Edge> edgeForDelete) {
+		if ((edgeForDelete == null) || edgeForDelete.isEmpty()) {
+			return;
+		}
+		List<Integer> epids = new ArrayList<Integer>();
+		List<Integer> aids = new ArrayList<Integer>();
+		for (Edge edge : edgeForDelete) {
+			if ((edge instanceof EdgeStart) && (((EdgeStart) edge).getEntryPoint() != null)
+					&& (((EdgeStart) edge).getEntryPoint().getId() != null)) {
+				epids.add(((EdgeStart) edge).getEntryPoint().getId());
+			}
+			if ((edge instanceof EdgeAction) && (((EdgeAction) edge).getAction() != null)
+					&& (((EdgeAction) edge).getAction().getId() != null)) {
+				aids.add(((EdgeAction) edge).getAction().getId());
+			}
+		}
+		if (!epids.isEmpty()) {
+			UssdDaoManager.deleteEntryPointsById(epids);
+		}
+		if (!aids.isEmpty()) {
+			UssdDaoManager.deleteActionsById(aids);
+		}
+	}
+
+	private static void deleteVertexes(Collection<Vertex> vertexForDelete) {
+		if ((vertexForDelete == null) || vertexForDelete.isEmpty()) {
+			return;
+		}
+		List<Integer> rids = new ArrayList<Integer>();
+		for (Vertex v : vertexForDelete) {
+			if ((v instanceof VertexRoom) && (((VertexRoom) v).getRoom() != null)
+					&& (((VertexRoom) v).getRoom().getId() != null)) {
+				rids.add(((VertexRoom) v).getRoom().getId());
+			}
+		}
+		if (!rids.isEmpty()) {
+			UssdDaoManager.deleteRoomsById(rids);
+		}
 	}
 
 
