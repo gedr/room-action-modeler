@@ -17,6 +17,7 @@
   <mapping class="ru.intech.ussd.modeler.entities.Action" />
   <mapping class="ru.intech.ussd.modeler.entities.EntryPoint" />
   <mapping class="ru.intech.ussd.modeler.entities.Room" />
+  <mapping class="ru.intech.ussd.modeler.entities.Projection" />
 
 
  </session-factory>

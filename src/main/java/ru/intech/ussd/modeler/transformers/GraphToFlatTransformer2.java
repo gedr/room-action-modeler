@@ -2,9 +2,11 @@ package ru.intech.ussd.modeler.transformers;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -16,12 +18,7 @@ import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.util.Unit;
 import edu.uci.ics.jung.graph.Graph;
 
-/**
- * project graph to flat area
- * @author egafarov
- *
- */
-public class GraphToFlatTranformer implements Transformer<Graph<Vertex, Unit<Edge>>, Map<Vertex, Point2D>>{
+public class GraphToFlatTransformer2 implements Transformer<Graph<Vertex, Unit<Edge>>, Map<Vertex, Point2D>>{
 	// =================================================================================================================
 	// Constants
 	// =================================================================================================================
@@ -29,13 +26,11 @@ public class GraphToFlatTranformer implements Transformer<Graph<Vertex, Unit<Edg
 	// =================================================================================================================
 	// Fields
 	// =================================================================================================================
-	private Vertex startVertex = null;
-	private Map<Vertex, Point2D> map = new HashMap<Vertex, Point2D>();
 
 	// =================================================================================================================
 	// Constructors
 	// =================================================================================================================
-	public GraphToFlatTranformer() {
+	public GraphToFlatTransformer2() {
 
 	}
 
@@ -43,21 +38,34 @@ public class GraphToFlatTranformer implements Transformer<Graph<Vertex, Unit<Edg
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
 	public Map<Vertex, Point2D> transform(Graph<Vertex, Unit<Edge>> graph) {
+		List<Vertex> starts = new ArrayList<Vertex>();
 		for (Vertex it : graph.getVertices()) {
 			if (graph.getInEdges(it).isEmpty()) {
-				startVertex = it;
-				break;
+				starts.add(it);
 			}
 		}
-		Map<Vertex, Point2D> map = calcVertexPositions(graph, startVertex, new Point(0, 0));
-		map = shiftX(graph);
-		map = setY(map);
-
-		for (Point2D it : map.values()) {
-			it.setLocation(it.getX() * 200 + 100, it.getY() * 100 + 50);
+		if (starts.isEmpty()) {
+			throw new IllegalArgumentException("graph haven't start's vertexes");
 		}
+		Map<Vertex, Point2D> ret = new HashMap<Vertex, Point2D>();
+		int offsetY = 0;
+		for (Vertex v : starts) {
+			Map<Vertex, Point2D> map = calcVertexPositions(graph, v, new Point(0, 0), null);
+			map = shiftX(graph, map);
+			map = setY(map);
+			moveVertexCoordinatesByY(map, offsetY);
 
-		return map;
+			int[] arr = getGraphHeightAllocation(map);
+			Arrays.sort(arr);
+			offsetY += arr[arr.length - 1];
+
+			for (Point2D it : map.values()) {
+				it.setLocation(it.getX() * 200 + 100, it.getY() * 100 + 50);
+			}
+
+			ret.putAll(map);
+		}
+		return ret;
 	}
 
 	// =================================================================================================================
@@ -68,22 +76,25 @@ public class GraphToFlatTranformer implements Transformer<Graph<Vertex, Unit<Edg
 	// Methods
 	// =================================================================================================================
 	/**
-	 * calculate position for all graph's vertex
+	 * calculate dirty position for all graph's vertex
 	 * @param graph - existing directed graph
 	 * @param vertex - start vertex
 	 * @param level - start level, must be 0
 	 * @param map - must be null
 	 * @return position for graph's vertex
 	 */
-	private Map<Vertex, Point2D> calcVertexPositions(Graph<Vertex, Unit<Edge>> graph, Vertex vertex, Point2D startPoint) {
+	private Map<Vertex, Point2D> calcVertexPositions(Graph<Vertex, Unit<Edge>> graph, Vertex vertex, Point2D startPoint
+			, Map<Vertex, Point2D> map) {
+		if (map == null) {
+			map = new HashMap<Vertex, Point2D>();
+		}
 		if (map.containsKey(vertex)) {
 			return map;
 		}
-
 		map.put(vertex, startPoint);
 		for (Unit<Edge> edge : graph.getOutEdges(vertex)) {
 			Vertex v = graph.getOpposite(vertex, edge);
-			map = calcVertexPositions(graph, v, new Point((int) (startPoint.getX() + 1), 0));
+			map = calcVertexPositions(graph, v, new Point((int) (startPoint.getX() + 1), 0), map);
 		}
 		return map;
 	}
@@ -96,7 +107,7 @@ public class GraphToFlatTranformer implements Transformer<Graph<Vertex, Unit<Edg
 	 * @param level - start level, must be 0
 	 * @return correct position for graph's vertex
 	 */
-	private Map<Vertex, Point2D> shiftX(Graph<Vertex, Unit<Edge>> graph) {
+	private Map<Vertex, Point2D> shiftX(Graph<Vertex, Unit<Edge>> graph, Map<Vertex, Point2D> map) {
 		int i = 0;
 		boolean cycle;
 
@@ -107,6 +118,7 @@ public class GraphToFlatTranformer implements Transformer<Graph<Vertex, Unit<Edg
 				if (Math.round(it.getValue().getX()) == i) {
 					cycle = true;
 					int pos = (int) Math.round(it.getValue().getX());
+
 
 					for (Unit<Edge> edge : graph.getInEdges(it.getKey())) {
 						Vertex v = graph.getOpposite(it.getKey(), edge);
@@ -155,6 +167,11 @@ public class GraphToFlatTranformer implements Transformer<Graph<Vertex, Unit<Edg
 		return false;
 	}
 
+	/**
+	 *
+	 * @param map
+	 * @return
+	 */
 	private Map<Vertex, Point2D> setY(Map<Vertex, Point2D> map) {
 		int[] yAllocation = getGraphHeightAllocation(map);
 
@@ -175,6 +192,11 @@ public class GraphToFlatTranformer implements Transformer<Graph<Vertex, Unit<Edg
 		return map;
 	}
 
+	/**
+	 * calculate quantity vertexes for every X
+	 * @param map
+	 * @return
+	 */
 	private int[] getGraphHeightAllocation(Map<Vertex, Point2D> map) {
 		int max = getGraphLength(map) + 1;
 		int[] arr = new int[max];
@@ -186,6 +208,11 @@ public class GraphToFlatTranformer implements Transformer<Graph<Vertex, Unit<Edg
 		return arr;
 	}
 
+	/**
+	 * find max vertex's X
+	 * @param map
+	 * @return
+	 */
 	private int getGraphLength(Map<Vertex, Point2D> map) {
 		int max = 0;
 		for (Point2D it : map.values()) {
@@ -196,8 +223,21 @@ public class GraphToFlatTranformer implements Transformer<Graph<Vertex, Unit<Edg
 		return max;
 	}
 
+	/**
+	 * offest
+	 * @param map
+	 * @param y
+	 * @return
+	 */
+	private Map<Vertex, Point2D> moveVertexCoordinatesByY(Map<Vertex, Point2D> map, int y) {
+		for (Point2D p : map.values()) {
+			p.setLocation(p.getX(), p.getY() + y);
+		}
+		return map;
+	}
 
 	// =================================================================================================================
 	// Inner and Anonymous Classes
 	// =================================================================================================================
+
 }

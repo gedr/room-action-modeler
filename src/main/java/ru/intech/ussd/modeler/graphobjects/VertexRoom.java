@@ -1,8 +1,13 @@
 package ru.intech.ussd.modeler.graphobjects;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.collections15.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
+import ru.intech.ussd.modeler.entities.Projection;
 import ru.intech.ussd.modeler.entities.Room;
 
 public class VertexRoom implements Vertex {
@@ -17,6 +22,7 @@ public class VertexRoom implements Vertex {
 	private String description;
 	private String function;
 	private boolean finish;
+	private Set<Projection> projections = new HashSet<Projection>();
 
 	// =================================================================================================================
 	// Constructors
@@ -54,7 +60,8 @@ public class VertexRoom implements Vertex {
 
 	public boolean isChanged() {
 		return room == null ? true : !(StringUtils.equals(getDescription(), room.getDescription())
-				&& StringUtils.equals(getFunction(), room.getFunction()) && (isFinish() == room.isFinish()));
+				&& StringUtils.equals(getFunction(), room.getFunction()) && (isFinish() == room.isFinish())
+				&& CollectionUtils.isEqualCollection(projections, room.getProjections()));
 	}
 
 	public void applyChanges() {
@@ -68,6 +75,9 @@ public class VertexRoom implements Vertex {
 		room.setFinish(isFinish());
 		room.setDescription(getDescription());
 		room.setFunction(getFunction());
+		if (!CollectionUtils.isEqualCollection(projections, room.getProjections())) {
+			room.setProjections(projections);
+		}
 	}
 
 	// =================================================================================================================
@@ -83,6 +93,9 @@ public class VertexRoom implements Vertex {
 			setDescription(room.getDescription());
 			setFunction(room.getFunction());
 			setFinish(room.isFinish());
+			if (!room.getProjections().isEmpty()) {
+				projections.addAll(room.getProjections());
+			}
 		}
 	}
 
@@ -110,9 +123,24 @@ public class VertexRoom implements Vertex {
 		this.finish = finish;
 	}
 
+	public Set<Projection> getProjections() {
+		return projections;
+	}
+
+	public void setProjections(Set<Projection> projections) {
+		this.projections = projections;
+	}
+
 	// =================================================================================================================
 	// Methods
 	// =================================================================================================================
+	public boolean addProjection(Projection projection) {
+		return projections.add(projection);
+	}
+
+	public boolean removeProjection(Projection projection) {
+		return projections.remove(projection);
+	}
 
 	// =================================================================================================================
 	// Inner and Anonymous Classes

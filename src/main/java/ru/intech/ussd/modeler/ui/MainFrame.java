@@ -6,9 +6,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
@@ -18,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import ru.intech.ussd.modeler.config.GraphConfig;
 import ru.intech.ussd.modeler.control.VertexAndEdgeControl;
+import ru.intech.ussd.modeler.dao.UssdDaoManager;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.services.GraphService;
@@ -36,8 +40,10 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 	private static final String ACTION_CMD_SAVE = "save";
 	private static final String ACTION_CMD_CHECK = "check";
 	private static final String ACTION_CMD_DELETE = "delete";
+	private static final String ACTION_CMD_LOAD = "load";
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainFrame.class);
+
 
 	// =================================================================================================================
 	// Fields
@@ -151,8 +157,25 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
         btn.addActionListener(this);
         tb.add(btn);
 
+        List<String> lst = UssdDaoManager.loadServices();
+        lst.add(0, "");
+        JComboBox<String> cb = new JComboBox<String>(lst.toArray(new String[0]));
+        tb.add(cb);
+
+        btn = new JButton("load");
+        btn.setActionCommand(ACTION_CMD_LOAD);
+        btn.addActionListener(this);
+        tb.add(btn);
+
+        btn = new JButton("add");
+        String s = JOptionPane.showInputDialog("Название нового сервиса");
+        cb.addItem(s);
+
+
         return tb;
 	}
+
+
 
 
 	// =================================================================================================================

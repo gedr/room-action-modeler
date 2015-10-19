@@ -1,13 +1,13 @@
-package ru.intech.ussd.modeler.graphobjects;
+package ru.intech.ussd.modeler.transformers;
 
-import java.util.Random;
+import org.apache.commons.collections15.Transformer;
 
-/**
- * graph can contain only one VertexFinish object
- * @author egafarov
- *
- */
-public class VertexFinish implements VertexSpecial {
+import ru.intech.ussd.modeler.graphobjects.Edge;
+import ru.intech.ussd.modeler.graphobjects.EdgeAction;
+import ru.intech.ussd.modeler.graphobjects.EdgeStart;
+import ru.intech.ussd.modeler.util.Unit;
+
+public class EdgeLabelTransformer implements Transformer<Unit<Edge>, String> {
 	// =================================================================================================================
 	// Constants
 	// =================================================================================================================
@@ -15,46 +15,30 @@ public class VertexFinish implements VertexSpecial {
 	// =================================================================================================================
 	// Fields
 	// =================================================================================================================
-	int hash;
 
 	// =================================================================================================================
 	// Constructors
 	// =================================================================================================================
-	public VertexFinish() {
-		hash = new Random().nextInt();
+	public EdgeLabelTransformer() {
+
 	}
 
 	// =================================================================================================================
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
-	@Override
-	public String toString() {
-		return "VertexFinish";
-	}
-
-	@Override
-	public int hashCode() {
-		return hash;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
+	public String transform(Unit<Edge> input) {
+		if (input == null) {
+			return null;
 		}
-		if (obj == null) {
-			return false;
+		if (input.getValue() instanceof EdgeAction) {
+			return String.valueOf(((EdgeAction) input.getValue()).getKey());
 		}
-		return (obj instanceof VertexFinish);
-	};
-
-	public boolean isChanged() {
-		return false;
+		if (input.getValue() instanceof EdgeStart) {
+			return ((EdgeStart) input.getValue()).getKey();
+		}
+		return null;
 	}
 
-	public void applyChanges() {
-
-	}
 
 	// =================================================================================================================
 	// Getter & Setter

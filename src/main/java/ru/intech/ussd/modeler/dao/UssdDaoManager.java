@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import ru.intech.ussd.modeler.entities.Action;
 import ru.intech.ussd.modeler.entities.EntryPoint;
+import ru.intech.ussd.modeler.entities.Projection;
 import ru.intech.ussd.modeler.entities.Room;
 import ru.intech.ussd.modeler.util.OrmHelper;
 import ru.intech.ussd.modeler.util.OrmHelper.QUERY_LANG;
@@ -57,14 +58,40 @@ public class UssdDaoManager {
 		return Collections.emptyList();
 	}
 
+	public static List<String> loadServices() {
+		String hsql = "SELECT distinct ep.service FROM EntryPoint AS ep";
+		try {
+			return ussd.executeAndGetResultList(QUERY_LANG.HSQL, hsql, null);
+		} catch (Throwable e) {
+			LOG.error("loadServices failed : ", e);
+		}
+		return Collections.emptyList();
+	}
+
+
 	public static List<Action> loadActionByService(String service) {
-		String hsql = "SELECT a FROM Action AS a INNER JOIN FETCH a.currentRoom INNER JOIN FETCH a.nextRoom "
+		String hsql = "SELECT a FROM Action AS a "
+				+ " INNER JOIN FETCH a.currentRoom "
+				+ " LEFT JOIN FETCH a.currentRoom.projections "
+				+ " INNER JOIN FETCH a.nextRoom "
+				+ " LEFT JOIN FETCH a.nextRoom.projections "
 				+ " WHERE a.service = :service";
 		try {
 			return ussd.executeAndGetResultList(QUERY_LANG.HSQL, hsql,
 					OrmHelper.QueryAttrs.build().setParam("service", service));
 		} catch (Throwable e) {
 			LOG.error("loadEntryPointForService failed : ", e);
+		}
+		return Collections.emptyList();
+	}
+
+	public static List<Projection> loadProjections(String service) {
+		String hsql = "SELECT p FROM Projection AS p WHERE p.service = :service";
+		try {
+			return ussd.executeAndGetResultList(QUERY_LANG.HSQL, hsql,
+					OrmHelper.QueryAttrs.build().setParam("service", service));
+		} catch (Throwable e) {
+			LOG.error("loadProjections failed : ", e);
 		}
 		return Collections.emptyList();
 	}

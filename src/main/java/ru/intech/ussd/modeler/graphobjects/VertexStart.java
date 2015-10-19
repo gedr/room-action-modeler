@@ -1,5 +1,7 @@
 package ru.intech.ussd.modeler.graphobjects;
 
+import java.util.Random;
+
 public class VertexStart implements VertexSpecial {
 	// =================================================================================================================
 	// Constants
@@ -8,17 +10,39 @@ public class VertexStart implements VertexSpecial {
 	// =================================================================================================================
 	// Fields
 	// =================================================================================================================
+	int hash;
 
 	// =================================================================================================================
 	// Constructors
 	// =================================================================================================================
 	public VertexStart() {
-
+		hash = new Random().nextInt();
 	}
 
 	// =================================================================================================================
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
+	@Override
+	public String toString() {
+		return "VertexStart";
+	}
+
+	@Override
+	public int hashCode() {
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		return (obj instanceof VertexStart);
+	};
+
 	public boolean isChanged() {
 		return false;
 	}

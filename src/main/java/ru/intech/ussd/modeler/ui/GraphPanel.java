@@ -6,10 +6,15 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
+import org.apache.commons.collections15.CollectionUtils;
 import org.apache.commons.collections15.Factory;
 import org.apache.commons.collections15.Transformer;
 import org.apache.commons.collections15.TransformerUtils;
@@ -19,18 +24,22 @@ import org.slf4j.LoggerFactory;
 import ru.intech.ussd.modeler.config.GraphConfig;
 import ru.intech.ussd.modeler.control.CreateEdgeControlImpl;
 import ru.intech.ussd.modeler.control.RoomEditingModalGraphMouse;
+import ru.intech.ussd.modeler.entities.Projection;
 import ru.intech.ussd.modeler.entities.Room;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.graphobjects.VertexRoom;
 import ru.intech.ussd.modeler.graphobjects.VertexSpecial;
-import ru.intech.ussd.modeler.transformers.GraphToFlatTranformer;
+import ru.intech.ussd.modeler.transformers.EdgeLabelTransformer;
+import ru.intech.ussd.modeler.transformers.GraphToFlatTransformer2;
 import ru.intech.ussd.modeler.transformers.RoomShapeTransformer;
 import ru.intech.ussd.modeler.transformers.RoomVertexIconTranformer;
 import ru.intech.ussd.modeler.util.Unit;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.StaticLayout;
+import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.util.EdgeType;
 import edu.uci.ics.jung.visualization.DefaultVisualizationModel;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationModel;
@@ -94,7 +103,7 @@ public class GraphPanel extends JPanel {
 	// Methods
 	// =================================================================================================================
 	private void init() {
-		map = new GraphToFlatTranformer().transform(graph);
+		map = new GraphToFlatTransformer2().transform(graph);
 		Transformer<Vertex, Point2D> vertexTrasformer = TransformerUtils.mapTransformer(map);
 		Layout<Vertex, Unit<Edge>> layout = new StaticLayout<Vertex, Unit<Edge>>(graph, vertexTrasformer);
 
@@ -124,10 +133,9 @@ public class GraphPanel extends JPanel {
         vv.setGraphMouse(graphMouse);
         vv.addKeyListener(graphMouse.getModeKeyListener());
 
-//        JMenuBar menubar = new JMenuBar();
-//        menubar.add(graphMouse.getModeMenu());
-//        gzsp.setCorner(menubar);
-
+        JMenuBar menubar = new JMenuBar();
+        menubar.add(graphMouse.getModeMenu());
+        gzsp.setCorner(menubar);
 
         initVertexView();
         initEdgeView();
@@ -169,6 +177,7 @@ public class GraphPanel extends JPanel {
 //            }
 //        };
 //        vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
+        vv.getRenderContext().setEdgeLabelTransformer(new EdgeLabelTransformer());
 
         vv.setEdgeToolTipTransformer(new ToStringLabeller<Unit<Edge>>());
 	}
@@ -213,6 +222,40 @@ public class GraphPanel extends JPanel {
 			graph.removeEdge(ue);
 		}
 	}
+
+	public Graph<Vertex, Unit<Edge>> copyGraph() {
+		Graph<Vertex, Unit<Edge>> g = new DirectedSparseMultigraph<Vertex, Unit<Edge>>();
+
+		for (Vertex v : graph.getVertices()) {
+			g.addVertex(v);
+		}
+
+		for (Unit<Edge> e : graph.getEdges()) {
+			Vertex src = graph.getSource(e);
+			Vertex dst = graph.getDest(e);
+			g.addEdge(e, src, dst, EdgeType.DIRECTED);
+		}
+		return g;
+	}
+
+	public Graph<Vertex, Unit<Edge>> applyProjections(Graph<Vertex, Unit<Edge>> g, Collection<Projection> lst) {
+		if (lst == null) {
+			return g;
+		}
+		List<Vertex> lv = new ArrayList<Vertex>();
+		for (Vertex v : g.getVertices()) {
+			if ((v instanceof VertexRoom)
+					&& CollectionUtils.intersection(((VertexRoom) v).getProjections(), lst).isEmpty()) {
+				lv.add(v);
+			}
+		}
+		for (Vertex v : lv) {
+			g.removeVertex(v);
+		}
+		return g;
+	}
+
+
 
 	// =================================================================================================================
 	// Inner and Anonymous Classes
