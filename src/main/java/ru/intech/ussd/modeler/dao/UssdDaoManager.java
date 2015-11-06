@@ -14,6 +14,7 @@ import ru.intech.ussd.modeler.entities.Action;
 import ru.intech.ussd.modeler.entities.EntryPoint;
 import ru.intech.ussd.modeler.entities.Projection;
 import ru.intech.ussd.modeler.entities.Room;
+import ru.intech.ussd.modeler.entities.RoomPosition;
 import ru.intech.ussd.modeler.util.OrmHelper;
 import ru.intech.ussd.modeler.util.OrmHelper.QUERY_LANG;
 
@@ -196,6 +197,27 @@ public class UssdDaoManager {
 		Validate.notNull(a.getId());
 		try {
 			ussd.update(a);
+		} catch (Throwable e) {
+			LOG.error("updateRoom failed : ", e);
+		}
+	}
+
+	public static void savePosition(RoomPosition p) {
+		LOG.info("savePosition({})", p);
+		Validate.notNull(p);
+		try {
+			ussd.save(p);
+		} catch (Throwable e) {
+			LOG.error("saveRoom failed : ", e);
+		}
+	}
+
+	public static void updatePosition(RoomPosition p) {
+		LOG.info("updatePosition({})", p);
+		Validate.notNull(p);
+		Validate.notNull(p.getId());
+		try {
+			ussd.update(p);
 		} catch (Throwable e) {
 			LOG.error("updateRoom failed : ", e);
 		}

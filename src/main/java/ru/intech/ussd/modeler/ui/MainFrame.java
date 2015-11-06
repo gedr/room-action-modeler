@@ -15,6 +15,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +42,10 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 	private static final String ACTION_CMD_CHECK = "check";
 	private static final String ACTION_CMD_DELETE = "delete";
 	private static final String ACTION_CMD_LOAD = "load";
+	private static final String ACTION_CMD_ADD = "add";
+	private static final String ACTION_CMD_MARK = "mark";
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainFrame.class);
-
 
 	// =================================================================================================================
 	// Fields
@@ -53,6 +55,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 	private GraphPanel graphPanel;
 	private VertexAndEdgeControl vertexAndEdgeControl;
 	private InfoPanel infoPanel;
+	private JComboBox<String> cb;
 
 	// =================================================================================================================
 	// Constructors
@@ -81,14 +84,29 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 			} else if (ACTION_CMD_DECREASE.equals(btn.getActionCommand())) {
 				graphPanel.decrease();
 			} else if (ACTION_CMD_SAVE.equals(btn.getActionCommand())) {
-				GraphService.saveGraph(graph, false, vertexAndEdgeControl.getRemovedVertexes()
-						, vertexAndEdgeControl.getRemovedEdges());
+				SwingUtilities.invokeLater(new Runnable() {
+				    public void run() {
+				    	LOG.debug("save graph");
+						graphPanel.savePositions();
+						GraphService.saveGraph(graph, false, vertexAndEdgeControl.getRemovedVertexes()
+								, vertexAndEdgeControl.getRemovedEdges());
+				    }
+				});
 			} else if (ACTION_CMD_CHECK.equals(btn.getActionCommand())) {
 				GraphService.checkGraph(graph);
 			} else if (ACTION_CMD_DELETE.equals(btn.getActionCommand())) {
 				graphPanel.deletePickedElements();
 				invalidate();
 				repaint();
+			} else if (ACTION_CMD_ADD.equals(btn.getActionCommand())) {
+		        String s = JOptionPane.showInputDialog("Название нового сервиса");
+		        cb.addItem(s);
+			} else if (ACTION_CMD_MARK.equals(btn.getActionCommand())) {
+				String s = JOptionPane.showInputDialog("Название нового сервиса");
+				if (StringUtils.isNotBlank(s)) {
+					graphPanel.mark(s);
+
+				}
 			}
 		}
 	}
@@ -156,10 +174,14 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
         btn.setActionCommand(ACTION_CMD_DELETE);
         btn.addActionListener(this);
         tb.add(btn);
+        btn = new JButton("*");
+        btn.setActionCommand(ACTION_CMD_MARK);
+        btn.addActionListener(this);
+        tb.add(btn);
 
         List<String> lst = UssdDaoManager.loadServices();
         lst.add(0, "");
-        JComboBox<String> cb = new JComboBox<String>(lst.toArray(new String[0]));
+        cb = new JComboBox<String>(lst.toArray(new String[0]));
         tb.add(cb);
 
         btn = new JButton("load");
@@ -168,8 +190,10 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
         tb.add(btn);
 
         btn = new JButton("add");
-        String s = JOptionPane.showInputDialog("Название нового сервиса");
-        cb.addItem(s);
+        btn.setActionCommand(ACTION_CMD_ADD);
+        btn.addActionListener(this);
+        tb.add(btn);
+
 
 
         return tb;

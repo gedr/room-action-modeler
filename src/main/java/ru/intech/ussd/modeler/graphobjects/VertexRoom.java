@@ -1,6 +1,7 @@
 package ru.intech.ussd.modeler.graphobjects;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.collections15.CollectionUtils;
@@ -9,6 +10,7 @@ import org.apache.commons.lang3.Validate;
 
 import ru.intech.ussd.modeler.entities.Projection;
 import ru.intech.ussd.modeler.entities.Room;
+import ru.intech.ussd.modeler.entities.RoomPosition;
 
 public class VertexRoom implements Vertex {
 	// =================================================================================================================
@@ -22,6 +24,7 @@ public class VertexRoom implements Vertex {
 	private String description;
 	private String function;
 	private boolean finish;
+	private RoomPosition position;
 	private Set<Projection> projections = new HashSet<Projection>();
 
 	// =================================================================================================================
@@ -61,7 +64,8 @@ public class VertexRoom implements Vertex {
 	public boolean isChanged() {
 		return room == null ? true : !(StringUtils.equals(getDescription(), room.getDescription())
 				&& StringUtils.equals(getFunction(), room.getFunction()) && (isFinish() == room.isFinish())
-				&& CollectionUtils.isEqualCollection(projections, room.getProjections()));
+				&& CollectionUtils.isEqualCollection(projections, room.getProjections())
+				&& Objects.equals(position, room.getPosition()));
 	}
 
 	public void applyChanges() {
@@ -75,6 +79,15 @@ public class VertexRoom implements Vertex {
 		room.setFinish(isFinish());
 		room.setDescription(getDescription());
 		room.setFunction(getFunction());
+		if (getPosition() != null) {
+			if (room.getPosition() == null) {
+				room.setPosition(getPosition());
+			} else {
+				room.getPosition().setX(getPosition().getX());
+				room.getPosition().setY(getPosition().getY());
+			}
+		}
+
 		if (!CollectionUtils.isEqualCollection(projections, room.getProjections())) {
 			room.setProjections(projections);
 		}
@@ -93,6 +106,7 @@ public class VertexRoom implements Vertex {
 			setDescription(room.getDescription());
 			setFunction(room.getFunction());
 			setFinish(room.isFinish());
+			setPosition(new RoomPosition(room.getPosition()));
 			if (!room.getProjections().isEmpty()) {
 				projections.addAll(room.getProjections());
 			}
@@ -129,6 +143,14 @@ public class VertexRoom implements Vertex {
 
 	public void setProjections(Set<Projection> projections) {
 		this.projections = projections;
+	}
+
+	public RoomPosition getPosition() {
+		return position;
+	}
+
+	public void setPosition(RoomPosition position) {
+		this.position = position;
 	}
 
 	// =================================================================================================================

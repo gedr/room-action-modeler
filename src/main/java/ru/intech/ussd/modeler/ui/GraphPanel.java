@@ -26,6 +26,7 @@ import ru.intech.ussd.modeler.control.CreateEdgeControlImpl;
 import ru.intech.ussd.modeler.control.RoomEditingModalGraphMouse;
 import ru.intech.ussd.modeler.entities.Projection;
 import ru.intech.ussd.modeler.entities.Room;
+import ru.intech.ussd.modeler.entities.RoomPosition;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.graphobjects.VertexRoom;
@@ -103,7 +104,7 @@ public class GraphPanel extends JPanel {
 	// Methods
 	// =================================================================================================================
 	private void init() {
-		map = new GraphToFlatTransformer2().transform(graph);
+		map = new GraphToFlatTransformer2(config).transform(graph);
 		Transformer<Vertex, Point2D> vertexTrasformer = TransformerUtils.mapTransformer(map);
 		Layout<Vertex, Unit<Edge>> layout = new StaticLayout<Vertex, Unit<Edge>>(graph, vertexTrasformer);
 
@@ -253,6 +254,32 @@ public class GraphPanel extends JPanel {
 			g.removeVertex(v);
 		}
 		return g;
+	}
+
+	public void mark(String s) {
+		vv.getPickedVertexState().clear();
+		for (Vertex v: graph.getVertices()) {
+			if ((v instanceof VertexRoom) && (((VertexRoom) v).getDescription() != null)
+					&& ((VertexRoom) v).getDescription().contains(s)) {
+				vv.getPickedVertexState().pick(v, true);
+			}
+		}
+	}
+
+	public void savePositions() {
+		for (Vertex v : graph.getVertices()) {
+			if (v instanceof VertexRoom) {
+				Point2D p = vv.getModel().getGraphLayout().transform(v);
+				VertexRoom vr = (VertexRoom) v;
+				RoomPosition pos = vr.getPosition();
+				if (pos == null) {
+					pos = new RoomPosition();
+				}
+				pos.setX((int) p.getX());
+				pos.setY((int) p.getY());
+				vr.setPosition(pos);
+			}
+		}
 	}
 
 

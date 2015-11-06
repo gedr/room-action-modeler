@@ -16,6 +16,7 @@ import ru.intech.ussd.modeler.dao.UssdDaoManager;
 import ru.intech.ussd.modeler.entities.Action;
 import ru.intech.ussd.modeler.entities.EntryPoint;
 import ru.intech.ussd.modeler.entities.Room;
+import ru.intech.ussd.modeler.entities.RoomPosition;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.EdgeAction;
 import ru.intech.ussd.modeler.graphobjects.EdgeFinish;
@@ -223,6 +224,15 @@ public class GraphService {
 				} else {
 					UssdDaoManager.saveRoom(room);
 				}
+				RoomPosition p = room.getPosition();
+				if (p != null) {
+					if (p.getId() != null) {
+						UssdDaoManager.updatePosition(p);
+					} else {
+						p.setId(room.getId());
+						UssdDaoManager.savePosition(p);
+					}
+				}
 			}
 		}
 	}
@@ -362,7 +372,6 @@ public class GraphService {
 			UssdDaoManager.deleteRoomsById(rids);
 		}
 	}
-
 
 	// =================================================================================================================
 	// Inner and Anonymous Classes

@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,10 +14,17 @@ import java.util.Set;
 
 import org.apache.commons.collections15.Transformer;
 
+import ru.intech.ussd.modeler.config.GraphConfig;
+import ru.intech.ussd.modeler.entities.Room;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
+import ru.intech.ussd.modeler.graphobjects.VertexFinish;
+import ru.intech.ussd.modeler.graphobjects.VertexRoom;
+import ru.intech.ussd.modeler.graphobjects.VertexSpecial;
+import ru.intech.ussd.modeler.graphobjects.VertexStart;
 import ru.intech.ussd.modeler.util.Unit;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.util.Pair;
 
 public class GraphToFlatTransformer2 implements Transformer<Graph<Vertex, Unit<Edge>>, Map<Vertex, Point2D>>{
 	// =================================================================================================================
@@ -26,18 +34,93 @@ public class GraphToFlatTransformer2 implements Transformer<Graph<Vertex, Unit<E
 	// =================================================================================================================
 	// Fields
 	// =================================================================================================================
+	private GraphConfig config;
 
 	// =================================================================================================================
 	// Constructors
 	// =================================================================================================================
-	public GraphToFlatTransformer2() {
-
+	public GraphToFlatTransformer2(GraphConfig config) {
+		this.config = config;
 	}
 
 	// =================================================================================================================
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
 	public Map<Vertex, Point2D> transform(Graph<Vertex, Unit<Edge>> graph) {
+		Map<Vertex, Point2D> res = getExistingPositions(graph);
+		return (res != null ? res : format(graph));
+	}
+
+	// =================================================================================================================
+	// Getter & Setter
+	// =================================================================================================================
+
+	// =================================================================================================================
+	// Methods
+	// =================================================================================================================
+	private Map<Vertex, Point2D> getExistingPositions(Graph<Vertex, Unit<Edge>> graph) {
+		Map<Vertex, Point2D> ret = new HashMap<Vertex, Point2D>();
+
+		Vertex start = null;
+		Vertex finish = null;
+		for (Vertex v : graph.getVertices()) {
+			if (v instanceof VertexRoom) {
+				Room r = ((VertexRoom) v).getRoom();
+				if (r.getPosition() == null) {
+					ret.clear();
+					return null;
+				} else {
+					ret.put(v, new Point(r.getPosition().getX(), r.getPosition().getY()));
+				}
+			}
+			if (v instanceof VertexStart) {
+				start = v;
+			}
+			if (v instanceof VertexFinish) {
+				finish = v;
+			}
+		}
+		if ((start == null) || (finish == null)) {
+			throw new IllegalStateException("start or finish vertex not found");
+		}
+		ret.put(start, getPositionForSpecalVertex(graph, ret, start));
+		ret.put(finish, getPositionForSpecalVertex(graph, ret, finish));
+
+		return ret;
+	}
+
+	private Point2D getPositionForSpecalVertex(Graph<Vertex, Unit<Edge>> graph, Map<Vertex, Point2D> map, Vertex v) {
+		if (!(v instanceof VertexSpecial)) {
+			throw new IllegalStateException("getPositionForSpecalVertex() : argument is notspecial vertex");
+		}
+		Collection<Unit<Edge>> edges = ((v instanceof VertexStart) ? graph.getOutEdges(v) : graph.getInEdges(v));
+		List<Point2D> points = new ArrayList<Point2D>();
+		for (Unit<Edge> e : edges) {
+			Pair<Vertex> p = graph.getEndpoints(e);
+			Vertex vr = (p.getFirst().equals(v) ? p.getSecond() : p.getFirst());
+			if (!(vr instanceof VertexSpecial)) {
+				points.add(map.get(vr));
+			}
+		}
+		Point2D ret = new Point(0, 0);
+		if (!points.isEmpty()) {
+			 ret = points.get(0);
+			 int diff = -1;
+			 for (Point2D p : points) {
+				 if (v instanceof VertexStart) {
+					 ret.setLocation( ((ret.getX() <= p.getX()) ? ret.getX() : p.getX()), ((ret.getY() + p.getY()) / 2) );
+				 } else {
+					 diff = 1;
+					 ret.setLocation( ((ret.getX() >= p.getX()) ? ret.getX() : p.getX()), ((ret.getY() + p.getY()) / 2) );
+				 }
+			 }
+
+			 ret.setLocation(ret.getX() + diff *  (100 + config.getRoomWidth() / 2), ret.getY());
+		}
+		return ret;
+	}
+
+	private Map<Vertex, Point2D> format(Graph<Vertex, Unit<Edge>> graph) {
 		List<Vertex> starts = new ArrayList<Vertex>();
 		for (Vertex it : graph.getVertices()) {
 			if (graph.getInEdges(it).isEmpty()) {
@@ -68,13 +151,6 @@ public class GraphToFlatTransformer2 implements Transformer<Graph<Vertex, Unit<E
 		return ret;
 	}
 
-	// =================================================================================================================
-	// Getter & Setter
-	// =================================================================================================================
-
-	// =================================================================================================================
-	// Methods
-	// =================================================================================================================
 	/**
 	 * calculate dirty position for all graph's vertex
 	 * @param graph - existing directed graph
