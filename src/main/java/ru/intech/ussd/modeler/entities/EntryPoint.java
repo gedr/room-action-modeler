@@ -49,7 +49,7 @@ public class EntryPoint implements java.io.Serializable {
 	private String userMessage;
 
 	@Column(name = "active")
-	private Integer active;
+	private boolean active;
 
 	@Transient
 	private int hash;
@@ -144,11 +144,11 @@ public class EntryPoint implements java.io.Serializable {
 		this.userMessage = userMessage;
 	}
 
-	public Integer getActive() {
+	public boolean isActive() {
 		return this.active;
 	}
 
-	public void setActive(Integer active) {
+	public void setActive(boolean active) {
 		this.active = active;
 	}
 

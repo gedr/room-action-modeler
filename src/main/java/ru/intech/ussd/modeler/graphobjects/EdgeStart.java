@@ -39,7 +39,7 @@ public class EdgeStart implements Edge{
 		Validate.notBlank(key);
 		if (entryPoint == null) {
 			entryPoint = new EntryPoint();
-			entryPoint.setActive(0);
+			entryPoint.setActive(true);
 		}
 		entryPoint.setDescription(getDescription());
 		entryPoint.setUserMessage(getKey());

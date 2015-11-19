@@ -52,6 +52,9 @@ public class Action implements java.io.Serializable {
 	@Column(name = "akey", nullable = false, length = 1)
 	private char key;
 
+	@Column(name = "active", nullable = false)
+	private boolean active;
+
 	@Transient
 	private int hash;
 
@@ -137,7 +140,6 @@ public class Action implements java.io.Serializable {
 		this.service = service;
 	}
 
-
 	public String getDescription() {
 		return this.description;
 	}
@@ -146,13 +148,20 @@ public class Action implements java.io.Serializable {
 		this.description = description;
 	}
 
-
 	public char getKey() {
 		return this.key;
 	}
 
 	public void setKey(char key) {
 		this.key = key;
+	}
+
+	public boolean isActive() {
+		return this.active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
 	// =================================================================================================================
