@@ -66,7 +66,7 @@ public class Attribute implements java.io.Serializable {
 	@Override
 	public int hashCode() {
 		if (!hashActive) {
-			synchronized (RoomPosition.class) {
+			synchronized (Attribute.class) {
 				if (!hashActive) {
 					hashActive = true;
 					hash = (getId() == null ? UUID.randomUUID().hashCode() : getId());
@@ -91,7 +91,9 @@ public class Attribute implements java.io.Serializable {
 			return false;
 		}
 		Attribute other = (Attribute) obj;
-		return (Objects.equals(id, other.id) && (x == other.x) && (y == other.y) && (colorAsNum == other.colorAsNum));
+		return (Objects.equals(this.getId(), other.getId())
+				&& (this.getX() == other.getX()) && (this.getY() == other.getY())
+				&& (this.getColorAsNum() == other.getColorAsNum()));
 	};
 
 	// =================================================================================================================

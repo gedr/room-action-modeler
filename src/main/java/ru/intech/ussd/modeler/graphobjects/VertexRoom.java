@@ -1,16 +1,13 @@
 package ru.intech.ussd.modeler.graphobjects;
 
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.commons.collections15.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
+import ru.intech.ussd.modeler.entities.Attribute;
 import ru.intech.ussd.modeler.entities.Projection;
 import ru.intech.ussd.modeler.entities.Room;
-import ru.intech.ussd.modeler.entities.RoomPosition;
 
 public class VertexRoom implements Vertex {
 	// =================================================================================================================
@@ -21,17 +18,19 @@ public class VertexRoom implements Vertex {
 	// Fields
 	// =================================================================================================================
 	private Room room;
-	private String description;
-	private String function;
-	private boolean finish;
-	private RoomPosition position;
-	private Set<Projection> projections = new HashSet<Projection>();
+	private Room editRoom;
+//	private String description;
+//	private String function;
+//	private boolean finish;
+//	private Attribute attribute;
+//	private Set<Projection> projections = new HashSet<Projection>();
 
 	// =================================================================================================================
 	// Constructors
 	// =================================================================================================================
 	public VertexRoom(Room room) {
-		setRoom(room);
+		this.room = room;
+		editRoom = new Room(room);
 	}
 
 	// =================================================================================================================
@@ -62,35 +61,26 @@ public class VertexRoom implements Vertex {
 	};
 
 	public boolean isChanged() {
-		return room == null ? true : !(StringUtils.equals(getDescription(), room.getDescription())
-				&& StringUtils.equals(getFunction(), room.getFunction()) && (isFinish() == room.isFinish())
-				&& CollectionUtils.isEqualCollection(projections, room.getProjections())
-				&& Objects.equals(position, room.getPosition()));
+		return !Objects.equals(room, editRoom);
+//		return room == null ? true : !(StringUtils.equals(getDescription(), room.getDescription())
+//				&& StringUtils.equals(getFunction(), room.getFunction()) && (isFinish() == room.isFinish())
+//				&& CollectionUtils.isEqualCollection(projections, room.getProjections())
+//				&& Objects.equals(attribute, room.getAttribute()));
 	}
 
 	public void applyChanges() {
 		if (!isChanged()) {
 			return;
 		}
-		Validate.notBlank(function);
+		Validate.notBlank(editRoom.getFunction());
 		if (room == null) {
 			room = new Room();
 		}
 		room.setFinish(isFinish());
 		room.setDescription(getDescription());
 		room.setFunction(getFunction());
-		if (getPosition() != null) {
-			if (room.getPosition() == null) {
-				room.setPosition(getPosition());
-			} else {
-				room.getPosition().setX(getPosition().getX());
-				room.getPosition().setY(getPosition().getY());
-			}
-		}
-
-		if (!CollectionUtils.isEqualCollection(projections, room.getProjections())) {
-			room.setProjections(projections);
-		}
+		room.setAttribute(getAttribute());
+		room.setProjections(getProjections());
 	}
 
 	// =================================================================================================================
@@ -100,68 +90,55 @@ public class VertexRoom implements Vertex {
 		return room;
 	}
 
-	public void setRoom(Room room) {
-		this.room = room;
-		if (room != null) {
-			setDescription(room.getDescription());
-			setFunction(room.getFunction());
-			setFinish(room.isFinish());
-			setPosition(new RoomPosition(room.getPosition()));
-			if (!room.getProjections().isEmpty()) {
-				projections.addAll(room.getProjections());
-			}
-		}
-	}
-
 	public String getDescription() {
-		return description;
+		return editRoom.getDescription();
 	}
 
 	public void setDescription(String description) {
-		this.description = description;
+		editRoom.setDescription(description);
 	}
 
 	public String getFunction() {
-		return function;
+		return editRoom.getFunction();
 	}
 
 	public void setFunction(String function) {
-		this.function = function;
+		editRoom.setFunction(function);
 	}
 
 	public boolean isFinish() {
-		return finish;
+		return editRoom.isFinish();
 	}
 
 	public void setFinish(boolean finish) {
-		this.finish = finish;
+		editRoom.setFinish(finish);
 	}
 
 	public Set<Projection> getProjections() {
-		return projections;
+		return editRoom.getProjections();
 	}
 
 	public void setProjections(Set<Projection> projections) {
-		this.projections = projections;
+		editRoom.setProjections(projections);
 	}
 
-	public RoomPosition getPosition() {
-		return position;
+	public Attribute getAttribute() {
+		return editRoom.getAttribute();
 	}
 
-	public void setPosition(RoomPosition position) {
-		this.position = position;
+	public void setAttribute(Attribute attribute) {
+		editRoom.setAttribute(attribute);
 	}
 
 	// =================================================================================================================
 	// Methods
 	// =================================================================================================================
 	public boolean addProjection(Projection projection) {
-		return projections.add(projection);
+		return editRoom.addProjection(projection);
 	}
 
 	public boolean removeProjection(Projection projection) {
-		return projections.remove(projection);
+		return editRoom.removeProjection(projection);
 	}
 
 	// =================================================================================================================

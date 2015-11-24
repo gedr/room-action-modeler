@@ -15,7 +15,7 @@ import java.util.Set;
 import org.apache.commons.collections15.Transformer;
 
 import ru.intech.ussd.modeler.config.GraphConfig;
-import ru.intech.ussd.modeler.entities.Room;
+import ru.intech.ussd.modeler.entities.Attribute;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.graphobjects.VertexFinish;
@@ -65,12 +65,12 @@ public class GraphToFlatTransformer2 implements Transformer<Graph<Vertex, Unit<E
 		Vertex finish = null;
 		for (Vertex v : graph.getVertices()) {
 			if (v instanceof VertexRoom) {
-				Room r = ((VertexRoom) v).getRoom();
-				if (r.getPosition() == null) {
+				Attribute a = ((VertexRoom) v).getAttribute();
+				if (a == null) {
 					ret.clear();
 					return null;
 				} else {
-					ret.put(v, new Point(r.getPosition().getX(), r.getPosition().getY()));
+					ret.put(v, new Point(a.getX(), a.getY()));
 				}
 			}
 			if (v instanceof VertexStart) {

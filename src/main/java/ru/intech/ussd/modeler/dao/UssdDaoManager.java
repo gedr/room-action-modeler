@@ -11,10 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.intech.ussd.modeler.entities.Action;
+import ru.intech.ussd.modeler.entities.Attribute;
 import ru.intech.ussd.modeler.entities.EntryPoint;
 import ru.intech.ussd.modeler.entities.Projection;
 import ru.intech.ussd.modeler.entities.Room;
-import ru.intech.ussd.modeler.entities.RoomPosition;
 import ru.intech.ussd.modeler.util.OrmHelper;
 import ru.intech.ussd.modeler.util.OrmHelper.QUERY_LANG;
 
@@ -202,24 +202,24 @@ public class UssdDaoManager {
 		}
 	}
 
-	public static void savePosition(RoomPosition p) {
-		LOG.info("savePosition({})", p);
-		Validate.notNull(p);
+	public static void saveAttribute(Attribute a) {
+		LOG.info("saveAttribute({})", a);
+		Validate.notNull(a);
 		try {
-			ussd.save(p);
+			ussd.save(a);
 		} catch (Throwable e) {
-			LOG.error("saveRoom failed : ", e);
+			LOG.error("save Attribute failed : ", e);
 		}
 	}
 
-	public static void updatePosition(RoomPosition p) {
-		LOG.info("updatePosition({})", p);
-		Validate.notNull(p);
-		Validate.notNull(p.getId());
+	public static void updateAttribute(Attribute a) {
+		LOG.info("updateAttribute({})", a);
+		Validate.notNull(a);
+		Validate.notNull(a.getId());
 		try {
-			ussd.update(p);
+			ussd.update(a);
 		} catch (Throwable e) {
-			LOG.error("updateRoom failed : ", e);
+			LOG.error("update Attribute failed : ", e);
 		}
 	}
 

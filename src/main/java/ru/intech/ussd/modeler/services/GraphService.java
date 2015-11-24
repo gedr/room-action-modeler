@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -14,9 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import ru.intech.ussd.modeler.dao.UssdDaoManager;
 import ru.intech.ussd.modeler.entities.Action;
+import ru.intech.ussd.modeler.entities.Attribute;
 import ru.intech.ussd.modeler.entities.EntryPoint;
 import ru.intech.ussd.modeler.entities.Room;
-import ru.intech.ussd.modeler.entities.RoomPosition;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.EdgeAction;
 import ru.intech.ussd.modeler.graphobjects.EdgeFinish;
@@ -66,15 +67,17 @@ public class GraphService {
 	}
 
 	private static void addVertexes(Graph<Vertex, Unit<Edge>> graph, List<EntryPoint> lep, List<Action> la) {
-		Set<Room> set = new HashSet<Room>();
+		Set<Room> cr = new HashSet<Room>();
+
 		for (EntryPoint it : lep) {
-			set.add(it.getRoom());
+			cr.add(it.getRoom());
 		}
+
 		for (Action it : la) {
-			set.add(it.getCurrentRoom());
-			set.add(it.getNextRoom());
+			cr.add(it.getCurrentRoom());
+			cr.add(it.getNextRoom());
 		}
-		for (Room it : set) {
+		for (Room it : cr) {
 			graph.addVertex(new VertexRoom(it));
 		}
 	}
@@ -114,7 +117,7 @@ public class GraphService {
 
 	private static Vertex findVertex(Room room, Graph<Vertex, Unit<Edge>> grap) {
 		for (Vertex it : grap.getVertices()) {
-			if ((it instanceof VertexRoom) && room.equals(((VertexRoom) it).getRoom())) {
+			if ((it instanceof VertexRoom) && Objects.equals(room, ((VertexRoom) it).getRoom())) {
 				return it;
 			}
 		}
@@ -224,13 +227,13 @@ public class GraphService {
 				} else {
 					UssdDaoManager.saveRoom(room);
 				}
-				RoomPosition p = room.getPosition();
-				if (p != null) {
-					if (p.getId() != null) {
-						UssdDaoManager.updatePosition(p);
+				Attribute a = room.getAttribute();
+				if (a != null) {
+					if (a.getId() != null) {
+						UssdDaoManager.updateAttribute(a);
 					} else {
-						p.setId(room.getId());
-						UssdDaoManager.savePosition(p);
+						a.setId(room.getId());
+						UssdDaoManager.saveAttribute(a);
 					}
 				}
 			}

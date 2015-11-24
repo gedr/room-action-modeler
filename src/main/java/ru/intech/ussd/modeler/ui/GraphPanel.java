@@ -24,9 +24,9 @@ import org.slf4j.LoggerFactory;
 import ru.intech.ussd.modeler.config.GraphConfig;
 import ru.intech.ussd.modeler.control.CreateEdgeControlImpl;
 import ru.intech.ussd.modeler.control.RoomEditingModalGraphMouse;
+import ru.intech.ussd.modeler.entities.Attribute;
 import ru.intech.ussd.modeler.entities.Projection;
 import ru.intech.ussd.modeler.entities.Room;
-import ru.intech.ussd.modeler.entities.RoomPosition;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.graphobjects.VertexRoom;
@@ -271,13 +271,13 @@ public class GraphPanel extends JPanel {
 			if (v instanceof VertexRoom) {
 				Point2D p = vv.getModel().getGraphLayout().transform(v);
 				VertexRoom vr = (VertexRoom) v;
-				RoomPosition pos = vr.getPosition();
-				if (pos == null) {
-					pos = new RoomPosition();
+				Attribute a = vr.getAttribute();
+				if (a == null) {
+					a = new Attribute();
 				}
-				pos.setX((int) p.getX());
-				pos.setY((int) p.getY());
-				vr.setPosition(pos);
+				a.setX((int) p.getX());
+				a.setY((int) p.getY());
+				vr.setAttribute(a);
 			}
 		}
 	}
@@ -288,3 +288,7 @@ public class GraphPanel extends JPanel {
 	// Inner and Anonymous Classes
 	// =================================================================================================================
 }
+
+
+
+
