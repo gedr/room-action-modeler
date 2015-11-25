@@ -1,12 +1,17 @@
 package ru.intech.ussd.modeler.ui;
 
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -37,7 +42,9 @@ public class InfoPanel extends JPanel {
 	private JTextField txtId;
 	private JTextField txtNameOrDesription;
 	private JTextField txtFunctionOrKey;
+	private JButton btnColor;
 	private Object editObject;
+
 
 	// =================================================================================================================
 	// Constructors
@@ -45,7 +52,9 @@ public class InfoPanel extends JPanel {
 	public InfoPanel() {
 		setLayout(new CardLayout());
 		add(new JLabel("<html><h1><center>Не выбран элемент</center></h1></html>"), EMPTY_FORM);
-		add(createInputForm(), INPUT_FORM);
+//		add(createInputForm(), INPUT_FORM);
+		add(createVertexForm(), INPUT_FORM);
+
 		((CardLayout) getLayout()).show(this, EMPTY_FORM);
 	}
 
@@ -68,6 +77,22 @@ public class InfoPanel extends JPanel {
 		txtId.setEditable(false);
 		txtNameOrDesription = new JTextField();
 		txtFunctionOrKey = new JTextField();
+		btnColor = new JButton();
+	}
+
+	private JPanel createVertexForm() {
+		createComponents();
+		JPanel panel = new JPanel(new MigLayout("", "[left][grow, fill][right]", "[][][]"));
+		panel.setBorder(BorderFactory.createLineBorder(Color.RED));
+		panel.add(lblId, "cell 0 0");
+		panel.add(txtId, "cell 1 0");
+		panel.add(lblNameOrDescription, "cell 0 1");
+		panel.add(txtNameOrDesription, "cell 1 1");
+		panel.add(lblFunctionOrKey, "cell 0 2 ");
+		panel.add(txtFunctionOrKey, "cell 1 2");
+		panel.add(btnColor, "grow, cell 2 0 1 3");
+
+		return panel;
 	}
 
 	private JPanel createInputForm() {
@@ -155,6 +180,7 @@ public class InfoPanel extends JPanel {
 			txtNameOrDesription.setEditable(true);
 			txtFunctionOrKey.setText(vr.getFunction());
 			txtFunctionOrKey.setEditable(true);
+			btnColor.setBackground(vr.getAttribute().getColor());
 		}
 		((CardLayout) getLayout()).show(this, INPUT_FORM);
 	}
