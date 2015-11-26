@@ -1,6 +1,7 @@
 package ru.intech.ussd.modeler.entities;
 // Generated 07.08.2015 14:31:53 by Hibernate Tools 3.4.0.CR1
 
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -67,6 +68,18 @@ public class Action implements java.io.Serializable {
 	public Action() {
 	}
 
+	public Action(Action other) {
+		if (other != null) {
+			this.setActive(other.isActive());
+			this.setKey(other.getKey());
+			this.setDescription(other.getDescription());
+			this.setService(other.getService());
+			this.setCurrentRoom(other.getCurrentRoom());
+			this.setNextRoom(other.getNextRoom());
+			this.setId(other.getId());
+		}
+	}
+
 	// =================================================================================================================
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
@@ -99,10 +112,14 @@ public class Action implements java.io.Serializable {
 		if (!(obj instanceof Action)) {
 			return false;
 		}
-		if (getId() == null) {
-			return false;
-		}
-		return getId().equals(((Action) obj).getId());
+		Action other = (Action) obj;
+		return Objects.equals(this.getId(), other.getId())
+				&& Objects.equals(this.getCurrentRoom(), other.getCurrentRoom())
+				&& Objects.equals(this.getNextRoom(), other.getNextRoom())
+				&& Objects.equals(this.getService(), other.getService())
+				&& Objects.equals(this.getDescription(), other.getDescription())
+				&& (this.isActive() == other.isActive())
+				&& (this.getKey() == other.getKey());
 	};
 
 	// =================================================================================================================

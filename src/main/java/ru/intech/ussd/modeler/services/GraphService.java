@@ -109,7 +109,8 @@ public class GraphService {
 		graph.addVertex(finish);
 
 		for (Vertex it : graph.getVertices()) {
-			if ((it instanceof VertexRoom) && graph.getOutEdges(it).isEmpty()) {
+			if ((it instanceof VertexRoom)
+					&& (graph.getOutEdges(it).isEmpty() || ((VertexRoom) it).isFinish())) {
 				graph.addEdge(new Unit<Edge>(new EdgeFinish()), it, finish, EdgeType.DIRECTED);
 			}
 		}

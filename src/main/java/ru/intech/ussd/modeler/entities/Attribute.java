@@ -91,9 +91,10 @@ public class Attribute implements java.io.Serializable {
 			return false;
 		}
 		Attribute other = (Attribute) obj;
-		return (Objects.equals(this.getId(), other.getId())
-				&& (this.getX() == other.getX()) && (this.getY() == other.getY())
-				&& (this.getColorAsNum() == other.getColorAsNum()));
+		return Objects.equals(this.getId(), other.getId())
+				&& (this.getX() == other.getX())
+				&& (this.getY() == other.getY())
+				&& (this.getColorAsNum() == other.getColorAsNum());
 	};
 
 	// =================================================================================================================

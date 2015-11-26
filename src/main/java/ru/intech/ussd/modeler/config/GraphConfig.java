@@ -16,12 +16,9 @@ public class GraphConfig {
 	private static final double DEFAULT_ROOM_HEIGHT = 50;
 	private static final Font DEFAULT_ROOM_FONT = new Font(null, Font.PLAIN, 10);
 
-	private static final Color DEFAULT_COLOR_PICKED_ROOM = new Color(X11Colors.DEEP_SKY_BLUE);
-	private static final Color DEFAULT_COLOR_UNPICKED_ROOM = new Color(X11Colors.SKY_BLUE);
-	private static final Color DEFAULT_COLOR_PICKED_START_ROOM = new Color(X11Colors.LIME);
-	private static final Color DEFAULT_COLOR_UNPICKED_START_ROOM = new Color(X11Colors.LIME_GREEN);
-	private static final Color DEFAULT_COLOR_PICKED_FINISH_ROOM = new Color(X11Colors.OLIVE);
-	private static final Color DEFAULT_COLOR_UNPICKED_FINISH_ROOM = new Color(X11Colors.OLIVE_DRAB);
+	private static final Color DEFAULT_COLOR_ROOM = new Color(X11Colors.SKY_BLUE);
+	private static final Color DEFAULT_COLOR_START_ROOM = new Color(X11Colors.LIME_GREEN);
+	private static final Color DEFAULT_COLOR_FINISH_ROOM = new Color(X11Colors.OLIVE_DRAB);
 
 	// =================================================================================================================
 	// Fields
@@ -32,12 +29,9 @@ public class GraphConfig {
 	private double roomHeight;
 	private Font roomFont;
 
-	private Color colorPickedRoom;
-	private Color colorUnpickedRoom;
-	private Color colorPickedStartRoom;
-	private Color colorUnpickedStartRoom;
-	private Color colorPickedFinishRoom;
-	private Color colorUnpickedFinishRoom;
+	private Color colorRoom;
+	private Color colorStartRoom;
+	private Color colorFinishRoom;
 
 	// =================================================================================================================
 	// Constructors
@@ -47,12 +41,9 @@ public class GraphConfig {
 		setDefaultRoomWidth();
 		setDefaultRoomHeight();
 		setDefaultRoomFont();
-		setDefaultColorPickedRoom();
-		setDefaultColorUnpickedRoom();
-		setDefaultColorPickedStartRoom();
-		setDefaultColorUnpickedStartRoom();
-		setDefaultColorPickedFinishRoom();
-		setDefaultColorUnpickedFinishRoom();
+		setDefaultColorRoom();
+		setDefaultColorStartRoom();
+		setDefaultColorFinishRoom();
 	}
 
 	// =================================================================================================================
@@ -94,52 +85,28 @@ public class GraphConfig {
 		this.roomFont = roomFont;
 	}
 
-	public Color getColorPickedRoom() {
-		return colorPickedRoom;
+	public Color getColorRoom() {
+		return colorRoom;
 	}
 
-	public void setColorPickedRoom(Color colorPickedRoom) {
-		this.colorPickedRoom = colorPickedRoom;
+	public void setColorRoom(Color colorRoom) {
+		this.colorRoom = colorRoom;
 	}
 
-	public Color getColorUnpickedRoom() {
-		return colorUnpickedRoom;
+	public void setColorStartRoom(Color colorStartRoom) {
+		this.colorStartRoom = colorStartRoom;
 	}
 
-	public void setColorUnpickedRoom(Color colorUnpickedRoom) {
-		this.colorUnpickedRoom = colorUnpickedRoom;
+	public Color getColorStartRoom() {
+		return colorStartRoom;
 	}
 
-	public Color getColorPickedStartRoom() {
-		return colorPickedStartRoom;
+	public void setColorFinishRoom(Color colorFinishRoom) {
+		this.colorFinishRoom = colorFinishRoom;
 	}
 
-	public void setColorPickedStartRoom(Color colorPickedStartRoom) {
-		this.colorPickedStartRoom = colorPickedStartRoom;
-	}
-
-	public Color getColorUnpickedStartRoom() {
-		return colorUnpickedStartRoom;
-	}
-
-	public void setColorUnpickedStartRoom(Color colorUnpickedStartRoom) {
-		this.colorUnpickedStartRoom = colorUnpickedStartRoom;
-	}
-
-	public Color getColorPickedFinishRoom() {
-		return colorPickedFinishRoom;
-	}
-
-	public void setColorPickedFinishRoom(Color colorPickedFinishRoom) {
-		this.colorPickedFinishRoom = colorPickedFinishRoom;
-	}
-
-	public Color getColorUnpickedFinishRoom() {
-		return colorUnpickedFinishRoom;
-	}
-
-	public void setColorUnpickedFinishRoom(Color colorUnpickedFinishRoom) {
-		this.colorUnpickedFinishRoom = colorUnpickedFinishRoom;
+	public Color getColorFinishRoom() {
+		return colorFinishRoom;
 	}
 
 	// =================================================================================================================
@@ -161,28 +128,16 @@ public class GraphConfig {
 		setRoomFont(DEFAULT_ROOM_FONT);
 	}
 
-	public void setDefaultColorPickedRoom() {
-		setColorPickedRoom(DEFAULT_COLOR_PICKED_ROOM);
+	public void setDefaultColorRoom() {
+		setColorRoom(DEFAULT_COLOR_ROOM);
 	}
 
-	public void setDefaultColorUnpickedRoom() {
-		setColorUnpickedRoom(DEFAULT_COLOR_UNPICKED_ROOM);
+	public void setDefaultColorStartRoom() {
+		setColorStartRoom(DEFAULT_COLOR_START_ROOM);
 	}
 
-	public void setDefaultColorPickedStartRoom() {
-		setColorPickedStartRoom(DEFAULT_COLOR_PICKED_START_ROOM);
-	}
-
-	public void setDefaultColorUnpickedStartRoom() {
-		setColorUnpickedStartRoom(DEFAULT_COLOR_UNPICKED_START_ROOM);
-	}
-
-	public void setDefaultColorPickedFinishRoom() {
-		setColorPickedFinishRoom(DEFAULT_COLOR_PICKED_FINISH_ROOM);
-	}
-
-	public void setDefaultColorUnpickedFinishRoom() {
-		setColorUnpickedFinishRoom(DEFAULT_COLOR_UNPICKED_FINISH_ROOM);
+	public void setDefaultColorFinishRoom() {
+		setColorFinishRoom(DEFAULT_COLOR_FINISH_ROOM);
 	}
 
 	// =================================================================================================================

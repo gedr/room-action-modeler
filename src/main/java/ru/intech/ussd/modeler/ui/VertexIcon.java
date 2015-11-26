@@ -1,5 +1,6 @@
 package ru.intech.ussd.modeler.ui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -11,6 +12,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 
 import ru.intech.ussd.modeler.config.GraphConfig;
+import ru.intech.ussd.modeler.entities.Attribute;
 import ru.intech.ussd.modeler.entities.Room;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.graphobjects.VertexFinish;
@@ -28,7 +30,7 @@ public class VertexIcon implements Icon {
 	private double scale = 1.0;
 	private GraphConfig config;
 	private Vertex vertex;
-	boolean picked;
+	private boolean picked;
 
 	// =================================================================================================================
 	// Constructors
@@ -55,18 +57,21 @@ public class VertexIcon implements Icon {
 
 		if (vertex instanceof VertexStart) {
 			label.setText(SpecialVertexName.start);
-			label.setBackground(picked ? config.getColorPickedStartRoom() : config.getColorUnpickedStartRoom());
+			label.setBackground(picked ? config.getColorStartRoom().brighter() : config.getColorStartRoom());
 		}
 		if (vertex instanceof VertexFinish) {
 			label.setText(SpecialVertexName.finish);
-			label.setBackground(picked ? config.getColorPickedFinishRoom() : config.getColorUnpickedFinishRoom());
+			label.setBackground(picked ? config.getColorFinishRoom().brighter() : config.getColorFinishRoom());
 		}
 		if (vertex instanceof VertexRoom) {
 			Room room = ((VertexRoom) vertex).getRoom();
 			String text = "<html><center>Room(" + (room == null ? "null" : String.valueOf(room.getId()))
 					+ ")<br/>" + ((VertexRoom) vertex).getDescription() + "</center></html>";
 			label.setText(text);
-			label.setBackground(picked ? config.getColorPickedRoom() : config.getColorUnpickedRoom());
+
+			Attribute a = ((VertexRoom) vertex).getAttribute();
+			Color color = (a == null ? config.getColorRoom() : a.getColor());
+			label.setBackground(picked ? color.brighter() : color);
 		}
 		BufferedImage bi = new BufferedImage(label.getWidth(), label.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		label.paint(bi.createGraphics());

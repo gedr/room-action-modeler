@@ -46,6 +46,14 @@ public class Projection implements java.io.Serializable {
 	public Projection() {
 	}
 
+	public Projection(Projection other) {
+		if (other != null) {
+			this.setId(other.getId());
+			this.setService(other.getService());
+			this.setName(other.getName());
+		}
+	}
+
 	// =================================================================================================================
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================

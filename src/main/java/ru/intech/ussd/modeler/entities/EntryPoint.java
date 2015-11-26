@@ -1,6 +1,7 @@
 package ru.intech.ussd.modeler.entities;
 // Generated 07.08.2015 14:31:53 by Hibernate Tools 3.4.0.CR1
 
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -63,6 +64,17 @@ public class EntryPoint implements java.io.Serializable {
 	public EntryPoint() {
 	}
 
+	public EntryPoint(EntryPoint other) {
+		if (other != null) {
+			this.setActive(other.isActive());
+			this.setUserMessage(other.getUserMessage());
+			this.setDescription(other.getDescription());
+			this.setService(other.getService());
+			this.setRoom(other.getRoom());
+			this.setId(other.getId());
+		}
+	}
+
 	// =================================================================================================================
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
@@ -95,10 +107,13 @@ public class EntryPoint implements java.io.Serializable {
 		if (!(obj instanceof EntryPoint)) {
 			return false;
 		}
-		if (getId() == null) {
-			return false;
-		}
-		return getId().equals(((EntryPoint) obj).getId());
+		EntryPoint other = (EntryPoint) obj;
+		return Objects.equals(this.getId(), other.getId())
+				&& Objects.equals(this.getService(), other.getService())
+				&& Objects.equals(this.getDescription(), other.getDescription())
+				&& Objects.equals(this.getUserMessage(), other.getUserMessage())
+				&& (this.isActive() == other.isActive())
+				&& Objects.equals(this.getRoom(), other.getRoom());
 	};
 
 	// =================================================================================================================

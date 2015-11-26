@@ -6,14 +6,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -56,6 +60,13 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 	private VertexAndEdgeControl vertexAndEdgeControl;
 	private InfoPanel infoPanel;
 	private JComboBox<String> cb;
+	private JLabel lblInfo;
+
+	private Timer timer = new Timer(750, this);
+
+	private int countSelectedVertexes = 0;
+	private int countSelectedEdges = 0;
+	private List<Object> selectedItem = new ArrayList<Object>();
 
 	// =================================================================================================================
 	// Constructors
@@ -109,23 +120,60 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 				}
 			}
 		}
+
+		if (e.getSource() instanceof Timer) {
+			((Timer) e.getSource()).stop();
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					if (selectedItem.isEmpty()) {
+						infoPanel.showEmpty();
+					} else {
+						Object o = selectedItem.get(selectedItem.size() - 1);
+						if (o instanceof Vertex) {
+							infoPanel.showVertex((Vertex) o);
+						} else {
+							@SuppressWarnings("unchecked")
+							Unit<Edge> ue = (Unit<Edge>) o;
+							infoPanel.showEdge(ue.getValue());
+						}
+					}
+					lblInfo.setText("V : " + countSelectedVertexes + " ; E : " + countSelectedEdges);
+				}
+			});
+
+		}
 	}
 
 	public void itemStateChanged(final ItemEvent e) {
 		if (e.getStateChange() == ItemEvent.SELECTED) {
 			SwingUtilities.invokeLater(new Runnable() {
-
 				public void run() {
 					if (e.getItem() instanceof Vertex) {
+						countSelectedVertexes++;
 						infoPanel.showVertex((Vertex) e.getItem());
 					} else {
+						countSelectedEdges++;
 						@SuppressWarnings("unchecked")
 						Unit<Edge> ue = (Unit<Edge>) e.getItem();
 						infoPanel.showEdge(ue.getValue());
 					}
+					selectedItem.add(e.getItem());
+					lblInfo.setText("V : " + countSelectedVertexes + " ; E : " + countSelectedEdges);
 				}
 			});
 		}
+		if (e.getStateChange() == ItemEvent.DESELECTED) {
+			System.out.println("DESELECTED " + e) ;
+			if (e.getItem() instanceof Vertex) {
+				countSelectedVertexes--;
+			} else {
+				countSelectedEdges--;
+			}
+			boolean res = selectedItem.remove(e.getItem());
+			System.out.println("deselect res = " + res + "  ;  selectedItem.size = " + selectedItem.size());
+			timer.start();
+		}
+
 		LOG.info("item state changed : {}", e);
 	}
 
@@ -149,7 +197,12 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 
 		getContentPane().add(graphPanel, BorderLayout.CENTER);
 		getContentPane().add(initToolBar(), BorderLayout.NORTH);
-		getContentPane().add(infoPanel, BorderLayout.SOUTH);
+
+		lblInfo = new JLabel("V : " + countSelectedVertexes + " ; E : " + countSelectedEdges);
+		JPanel p = new JPanel(new BorderLayout());
+		p.add(infoPanel, BorderLayout.CENTER);
+		p.add(lblInfo, BorderLayout.SOUTH);
+		getContentPane().add(p, BorderLayout.SOUTH);
 	}
 
 	private Component initToolBar() {
@@ -198,7 +251,6 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 
         return tb;
 	}
-
 
 
 

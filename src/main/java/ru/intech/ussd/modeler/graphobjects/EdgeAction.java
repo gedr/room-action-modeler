@@ -1,6 +1,6 @@
 package ru.intech.ussd.modeler.graphobjects;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.Objects;
 
 import ru.intech.ussd.modeler.entities.Action;
 
@@ -12,9 +12,8 @@ public class EdgeAction implements Edge {
 	// =================================================================================================================
 	// Fields
 	// =================================================================================================================
-	private Action action;
-	private String description;
-	private char key;
+	private Action src;
+	private Action edt;
 
 	// =================================================================================================================
 	// Constructors
@@ -27,50 +26,56 @@ public class EdgeAction implements Edge {
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
 	public boolean isChanged() {
-		return action == null ? true : !((getKey() == action.getKey())
-				&& StringUtils.equals(getDescription(), action.getDescription()));
+		return !Objects.equals(src, edt);
 	}
 
 	public void applyChanges() {
 		if (!isChanged()) {
 			return;
 		}
-		if (action == null) {
-			action = new Action();
+		if (src == null) {
+			src = new Action(edt);
+		} else {
+			src.setKey(getKey());
+			src.setDescription(getDescription());
+			src.setActive(isActive());
 		}
-		action.setKey(getKey());
-		action.setDescription(getDescription());
 	}
 
 	// =================================================================================================================
 	// Getter & Setter
 	// =================================================================================================================
 	public Action getAction() {
-		return action;
+		return src;
 	}
 
 	public void setAction(Action action) {
-		this.action = action;
-		if (action != null) {
-			setKey(action.getKey());
-			setDescription(action.getDescription());
-		}
+		this.src = action;
+		edt = new Action(action);
 	}
 
 	public String getDescription() {
-		return description;
+		return edt.getDescription();
 	}
 
 	public void setDescription(String description) {
-		this.description = description;
+		edt.setDescription(description);
 	}
 
 	public char getKey() {
-		return key;
+		return edt.getKey();
 	}
 
 	public void setKey(char key) {
-		this.key = key;
+		edt.setKey(key);
+	}
+
+	public boolean isActive() {
+		return edt.isActive();
+	}
+
+	public void setActive(boolean active) {
+		edt.setActive(active);
 	}
 
 	// =================================================================================================================

@@ -1,6 +1,7 @@
 package ru.intech.ussd.modeler.graphobjects;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.Objects;
+
 import org.apache.commons.lang3.Validate;
 
 import ru.intech.ussd.modeler.entities.EntryPoint;
@@ -13,9 +14,8 @@ public class EdgeStart implements Edge{
 	// =================================================================================================================
 	// Fields
 	// =================================================================================================================
-	private EntryPoint entryPoint;
-	private String key = null;
-	private String description = null;
+	private EntryPoint src;
+	private EntryPoint edt;
 
 	// =================================================================================================================
 	// Constructors
@@ -28,52 +28,57 @@ public class EdgeStart implements Edge{
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
 	public boolean isChanged() {
-		return entryPoint == null ? true : !(StringUtils.equals(getKey(), entryPoint.getUserMessage())
-				&& StringUtils.equals(getDescription(), entryPoint.getDescription()));
+		return !Objects.equals(src, edt);
 	}
 
 	public void applyChanges() {
 		if (!isChanged()) {
 			return;
 		}
-		Validate.notBlank(key);
-		if (entryPoint == null) {
-			entryPoint = new EntryPoint();
-			entryPoint.setActive(true);
+		Validate.notBlank(getKey());
+		if (src == null) {
+			src = new EntryPoint(edt);
+		} else {
+			src.setActive(isActive());
+			src.setDescription(getDescription());
+			src.setUserMessage(getKey());
 		}
-		entryPoint.setDescription(getDescription());
-		entryPoint.setUserMessage(getKey());
 	}
 
 	// =================================================================================================================
 	// Getter & Setter
 	// =================================================================================================================
 	public EntryPoint getEntryPoint() {
-		return entryPoint;
+		return src;
 	}
 
 	public void setEntryPoint(EntryPoint entryPoint) {
-		this.entryPoint = entryPoint;
-		if (entryPoint != null) {
-			setKey(entryPoint.getUserMessage());
-			setDescription(entryPoint.getDescription());
-		}
+		this.src = entryPoint;
+		edt = new EntryPoint(src);
 	}
 
 	public String getKey() {
-		return key;
+		return edt.getUserMessage();
 	}
 
 	public void setKey(String key) {
-		this.key = key;
+		edt.setUserMessage(key);
 	}
 
 	public String getDescription() {
-		return description;
+		return edt.getDescription();
 	}
 
 	public void setDescription(String description) {
-		this.description = description;
+		edt.setDescription(description);
+	}
+
+	public boolean isActive() {
+		return edt.isActive();
+	}
+
+	public void setActive(boolean active) {
+		edt.setActive(active);
 	}
 
 	// =================================================================================================================
