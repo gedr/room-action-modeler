@@ -109,6 +109,7 @@ public class VertexAndEdgeControl implements GraphEventListener<Vertex, Unit<Edg
 		} else {
 			EdgeAction edgeAction = new EdgeAction(null);
 			edgeAction.setKey('-');
+			edgeAction.setActive(true);
 			edge.setValue(edgeAction);
 		}
 	}

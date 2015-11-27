@@ -117,7 +117,10 @@ public class GraphPanel extends JPanel {
 
         Factory<Vertex> vertexFactory = new Factory<Vertex>() { // My vertex factory
             public Vertex create() {
-            	Vertex vertex = new VertexRoom(new Room());
+            	Room r = new Room();
+            	r.setAttribute(new Attribute());
+            	r.getAttribute().setColorAsNum(config.getColorRoom());
+            	Vertex vertex = new VertexRoom(r);
             	map.put(vertex, new Point(0, 0));
                 return vertex;
             }
@@ -168,16 +171,7 @@ public class GraphPanel extends JPanel {
         		, Color.cyan));
         vv.getRenderContext().setArrowFillPaintTransformer(new PickableEdgePaintTransformer<Unit<Edge>>(pse, Color.black
         		, Color.cyan));
-
-        // Set up a new stroke Transformer for the edges
-//        float dash[] = {10.0f};
-//        final Stroke edgeStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
-//        Transformer<Edge, Stroke> edgeStrokeTransformer = new Transformer<Edge, Stroke>() {
-//            public Stroke transform(Edge s) {
-//                return edgeStroke;
-//            }
-//        };
-//        vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
+//        vv.getRenderContext().setEdgeStrokeTransformer(new EdgeStrokeTransformer());
         vv.getRenderContext().setEdgeLabelTransformer(new EdgeLabelTransformer());
 
         vv.setEdgeToolTipTransformer(new ToStringLabeller<Unit<Edge>>());
@@ -281,8 +275,6 @@ public class GraphPanel extends JPanel {
 			}
 		}
 	}
-
-
 
 	// =================================================================================================================
 	// Inner and Anonymous Classes

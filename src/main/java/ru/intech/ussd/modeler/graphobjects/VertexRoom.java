@@ -17,20 +17,15 @@ public class VertexRoom implements Vertex {
 	// =================================================================================================================
 	// Fields
 	// =================================================================================================================
-	private Room room;
-	private Room editRoom;
-//	private String description;
-//	private String function;
-//	private boolean finish;
-//	private Attribute attribute;
-//	private Set<Projection> projections = new HashSet<Projection>();
+	private Room src;
+	private Room edt;
 
 	// =================================================================================================================
 	// Constructors
-	// =================================================================================================================
+	// =========================================================s========================================================
 	public VertexRoom(Room room) {
-		this.room = room;
-		editRoom = new Room(room);
+		this.src = room;
+		edt = new Room(room);
 	}
 
 	// =================================================================================================================
@@ -38,12 +33,12 @@ public class VertexRoom implements Vertex {
 	// =================================================================================================================
 	@Override
 	public String toString() {
-		return "VertexRoom < " + room + " >";
+		return "VertexRoom < " + src + " >";
 	}
 
 	@Override
 	public int hashCode() {
-		return room.hashCode();
+		return src.hashCode();
 	}
 
 	@Override
@@ -57,88 +52,85 @@ public class VertexRoom implements Vertex {
 		if (!(obj instanceof VertexRoom)) {
 			return false;
 		}
-		return room.equals(((VertexRoom)obj).getRoom());
+		return Objects.equals(src,  edt);
 	};
 
 	public boolean isChanged() {
-		return !Objects.equals(room, editRoom);
-//		return room == null ? true : !(StringUtils.equals(getDescription(), room.getDescription())
-//				&& StringUtils.equals(getFunction(), room.getFunction()) && (isFinish() == room.isFinish())
-//				&& CollectionUtils.isEqualCollection(projections, room.getProjections())
-//				&& Objects.equals(attribute, room.getAttribute()));
+		return !Objects.equals(src, edt);
 	}
 
 	public void applyChanges() {
 		if (!isChanged()) {
 			return;
 		}
-		Validate.notBlank(editRoom.getFunction());
-		if (room == null) {
-			room = new Room();
+		Validate.notBlank(edt.getFunction());
+		if (src == null) {
+			src = new Room(edt);
+		} else {
+			src.setFinish(isFinish());
+			src.setDescription(getDescription());
+			src.setFunction(getFunction());
+			src.setAttribute(getAttribute());
+			src.setProjections(getProjections());
 		}
-		room.setFinish(isFinish());
-		room.setDescription(getDescription());
-		room.setFunction(getFunction());
-		room.setAttribute(getAttribute());
-		room.setProjections(getProjections());
 	}
 
 	// =================================================================================================================
 	// Getter & Setter
 	// =================================================================================================================
 	public Room getRoom() {
-		return room;
+		return src;
 	}
 
 	public String getDescription() {
-		return editRoom.getDescription();
+		return edt.getDescription();
 	}
 
 	public void setDescription(String description) {
-		editRoom.setDescription(description);
+		edt.setDescription(description);
 	}
 
 	public String getFunction() {
-		return editRoom.getFunction();
+		return edt.getFunction();
 	}
 
 	public void setFunction(String function) {
-		editRoom.setFunction(function);
+		edt.setFunction(function);
 	}
 
 	public boolean isFinish() {
-		return editRoom.isFinish();
+		return edt.isFinish();
 	}
 
 	public void setFinish(boolean finish) {
-		editRoom.setFinish(finish);
+		edt.setFinish(finish);
 	}
 
 	public Set<Projection> getProjections() {
-		return editRoom.getProjections();
+		return edt.getProjections();
 	}
 
 	public void setProjections(Set<Projection> projections) {
-		editRoom.setProjections(projections);
+		edt.setProjections(projections);
 	}
 
 	public Attribute getAttribute() {
-		return editRoom.getAttribute();
+		return edt.getAttribute();
 	}
 
 	public void setAttribute(Attribute attribute) {
-		editRoom.setAttribute(attribute);
+		edt.setAttribute(attribute);
 	}
 
 	// =================================================================================================================
 	// Methods
 	// =================================================================================================================
 	public boolean addProjection(Projection projection) {
-		return editRoom.addProjection(projection);
+		return edt.addProjection(projection);
 	}
 
 	public boolean removeProjection(Projection projection) {
-		return editRoom.removeProjection(projection);
+		return edt.removeProjection(projection);
 	}
 
 	// =================================================================================================================

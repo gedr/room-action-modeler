@@ -27,7 +27,7 @@ import ru.intech.ussd.modeler.graphobjects.VertexFinish;
 import ru.intech.ussd.modeler.graphobjects.VertexRoom;
 import ru.intech.ussd.modeler.graphobjects.VertexStart;
 import ru.intech.ussd.modeler.util.Unit;
-import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 
@@ -60,7 +60,7 @@ public class GraphService {
 		List<EntryPoint> eplst = UssdDaoManager.loadEntryPointByService(service);
 		List<Action> aplst = UssdDaoManager.loadActionByService(service);
 
-		Graph<Vertex, Unit<Edge>> graph = new DirectedSparseMultigraph<Vertex, Unit<Edge>>();
+		Graph<Vertex, Unit<Edge>> graph = new DirectedSparseGraph<Vertex, Unit<Edge>>();
 		addVertexes(graph, eplst, aplst);
 		addEdges(graph, eplst, aplst);
 		return graph;
@@ -88,6 +88,7 @@ public class GraphService {
 			Vertex v1 = findVertex(it.getCurrentRoom(), graph);
 			Vertex v2 = findVertex(it.getNextRoom(), graph);
 			graph.addEdge(new Unit<Edge>(edge), v1, v2, EdgeType.DIRECTED);
+//			System.out.println("addEdge for action = " + it.getId() + " from " + v1 + " to " + v2);
 		}
 		addStart(graph, lep, la);
 		addFinish(graph, lep, la);
@@ -109,8 +110,10 @@ public class GraphService {
 		graph.addVertex(finish);
 
 		for (Vertex it : graph.getVertices()) {
-			if ((it instanceof VertexRoom)
-					&& (graph.getOutEdges(it).isEmpty() || ((VertexRoom) it).isFinish())) {
+			if ((it instanceof VertexRoom) && graph.getOutEdges(it).isEmpty()) {
+
+//			if ((it instanceof VertexRoom)
+//					&& (graph.getOutEdges(it).isEmpty() || ((VertexRoom) it).isFinish())) {
 				graph.addEdge(new Unit<Edge>(new EdgeFinish()), it, finish, EdgeType.DIRECTED);
 			}
 		}

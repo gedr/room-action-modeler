@@ -60,7 +60,7 @@ public class Attribute implements java.io.Serializable {
 	// =================================================================================================================
 	@Override
 	public String toString() {
-		return "Attribute [" + getId() + "] : (" + getX() + ", " + getY() + ")";
+		return "Attribute : {id=" + getId() + ", x=" + getX() + ", y=" + getY() + ", color=" + getColorAsNum() + "}";
 	}
 
 	@Override

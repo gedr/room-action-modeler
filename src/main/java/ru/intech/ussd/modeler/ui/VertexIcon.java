@@ -71,6 +71,7 @@ public class VertexIcon implements Icon {
 
 			Attribute a = ((VertexRoom) vertex).getAttribute();
 			Color color = (a == null ? config.getColorRoom() : a.getColor());
+			System.out.println("VertexRoom color =" + color + ";  attr=" + a + ";  config color=" + config.getColorRoom());
 			label.setBackground(picked ? color.brighter() : color);
 		}
 		BufferedImage bi = new BufferedImage(label.getWidth(), label.getHeight(), BufferedImage.TYPE_INT_ARGB);

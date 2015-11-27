@@ -35,7 +35,6 @@ public class InfoPanel extends JPanel implements ActionListener {
 	private static final String EMPTY_FORM = "empty";
 	private static final String VERTEX_FORM = "vf";
 	private static final String EDGE_FORM = "ef";
-
 	private static final String CHANGE_VERTEX_COLOR = "cvc";
 
 	// =================================================================================================================
@@ -64,7 +63,6 @@ public class InfoPanel extends JPanel implements ActionListener {
 		setLayout(new CardLayout());
 		createComponents();
 		add(new JLabel("<html><h1><center>Не выбран элемент</center></h1></html>"), EMPTY_FORM);
-//		add(createInputForm(), INPUT_FORM);
 		add(vertexPanel, VERTEX_FORM);
 		add(edgePanel, EDGE_FORM);
 

@@ -29,8 +29,11 @@ import ru.intech.ussd.modeler.control.VertexAndEdgeControl;
 import ru.intech.ussd.modeler.dao.UssdDaoManager;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
+import ru.intech.ussd.modeler.graphobjects.VertexFinish;
+import ru.intech.ussd.modeler.graphobjects.VertexStart;
 import ru.intech.ussd.modeler.services.GraphService;
 import ru.intech.ussd.modeler.util.Unit;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.ObservableGraph;
 
@@ -112,12 +115,73 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 			} else if (ACTION_CMD_ADD.equals(btn.getActionCommand())) {
 		        String s = JOptionPane.showInputDialog("Название нового сервиса");
 		        cb.addItem(s);
+		        graph = new DirectedSparseGraph<Vertex, Unit<Edge>>();
+		        graph.addVertex(new VertexStart());
+		        graph.addVertex(new VertexFinish());
+		        graph = new ObservableGraph<Vertex, Unit<Edge>>(graph);
+		        graphPanel.setVisible(false);
+		        graphPanel = new GraphPanel(graph, config);
+		        getContentPane().add(graphPanel, BorderLayout.CENTER);
 			} else if (ACTION_CMD_MARK.equals(btn.getActionCommand())) {
 				String s = JOptionPane.showInputDialog("Название нового сервиса");
 				if (StringUtils.isNotBlank(s)) {
 					graphPanel.mark(s);
-
 				}
+			} else if (ACTION_CMD_LOAD.equals(btn.getActionCommand())) {
+				SwingUtilities.invokeLater(new Runnable() {
+
+					public void run() {
+						List<Unit<Edge>> cue = new ArrayList<Unit<Edge>>(graph.getEdges());
+						for (Unit<Edge> ue : cue) {
+							graph.removeEdge(ue);
+						}
+
+						graphPanel.invalidate();
+						graphPanel.repaint();
+					}
+				});
+
+
+//				for (Unit<Edge> ue : graph.getEdges()) {
+//					String sss = "unknown";
+//					if (ue.getValue() instanceof EdgeStart) {
+//						sss = ((EdgeStart) ue.getValue()).toString();
+//					}
+//					if (ue.getValue() instanceof EdgeAction) {
+//						sss = ((EdgeAction) ue.getValue()).toString();
+//					}
+//					if (ue.getValue() instanceof EdgeFinish) {
+//						sss = ((EdgeFinish) ue.getValue()).toString();
+//					}
+//
+//					Pair<Vertex> pr = graph.getEndpoints(ue);
+//					String v1 = "unknown";
+//					String v2 = "unknown";
+//
+//					if (pr.getFirst() instanceof VertexRoom) {
+//						v1 = "room #" + ((VertexRoom) pr.getFirst()).getRoom().getId();
+//					}
+//					if (pr.getFirst() instanceof VertexStart) {
+//						v1 = ((VertexStart) pr.getFirst()).toString();
+//					}
+//					if (pr.getFirst() instanceof VertexFinish) {
+//						v1 = ((VertexFinish) pr.getFirst()).toString();
+//					}
+//
+//					if (pr.getSecond() instanceof VertexRoom) {
+//						v2 = "room #" + ((VertexRoom) pr.getSecond()).getRoom().getId();
+//					}
+//					if (pr.getSecond() instanceof VertexStart) {
+//						v2 = ((VertexStart) pr.getSecond()).toString();
+//					}
+//					if (pr.getSecond() instanceof VertexFinish) {
+//						v2 = ((VertexFinish) pr.getSecond()).toString();
+//					}
+//
+//					System.out.println(v1 + "  --" + sss + "--  " + v2);
+//				}
+
+
 			}
 		}
 
@@ -251,6 +315,8 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 
         return tb;
 	}
+
+
 
 
 
