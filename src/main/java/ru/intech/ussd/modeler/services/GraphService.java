@@ -88,7 +88,6 @@ public class GraphService {
 			Vertex v1 = findVertex(it.getCurrentRoom(), graph);
 			Vertex v2 = findVertex(it.getNextRoom(), graph);
 			graph.addEdge(new Unit<Edge>(edge), v1, v2, EdgeType.DIRECTED);
-//			System.out.println("addEdge for action = " + it.getId() + " from " + v1 + " to " + v2);
 		}
 		addStart(graph, lep, la);
 		addFinish(graph, lep, la);
@@ -110,10 +109,8 @@ public class GraphService {
 		graph.addVertex(finish);
 
 		for (Vertex it : graph.getVertices()) {
-			if ((it instanceof VertexRoom) && graph.getOutEdges(it).isEmpty()) {
-
-//			if ((it instanceof VertexRoom)
-//					&& (graph.getOutEdges(it).isEmpty() || ((VertexRoom) it).isFinish())) {
+			if ((it instanceof VertexRoom)
+					&& (graph.getOutEdges(it).isEmpty() || ((VertexRoom) it).isFinish())) {
 				graph.addEdge(new Unit<Edge>(new EdgeFinish()), it, finish, EdgeType.DIRECTED);
 			}
 		}

@@ -13,8 +13,10 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -27,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import ru.intech.ussd.modeler.config.GraphConfig;
 import ru.intech.ussd.modeler.control.VertexAndEdgeControl;
 import ru.intech.ussd.modeler.dao.UssdDaoManager;
+import ru.intech.ussd.modeler.entities.Projection;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.graphobjects.VertexFinish;
@@ -64,6 +67,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 	private InfoPanel infoPanel;
 	private JComboBox<String> cb;
 	private JLabel lblInfo;
+	private JList<Projection> lstProjectons;
 
 	private Timer timer = new Timer(750, this);
 
@@ -91,99 +95,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() instanceof JButton) {
-			JButton btn = (JButton) e.getSource();
-			if (ACTION_CMD_MAGNIFY.equals(btn.getActionCommand())) {
-				graphPanel.magnify();
-			} else if (ACTION_CMD_DECREASE.equals(btn.getActionCommand())) {
-				graphPanel.decrease();
-			} else if (ACTION_CMD_SAVE.equals(btn.getActionCommand())) {
-				SwingUtilities.invokeLater(new Runnable() {
-				    public void run() {
-				    	LOG.debug("save graph");
-						graphPanel.savePositions();
-						GraphService.saveGraph(graph, false, vertexAndEdgeControl.getRemovedVertexes()
-								, vertexAndEdgeControl.getRemovedEdges());
-				    }
-				});
-			} else if (ACTION_CMD_CHECK.equals(btn.getActionCommand())) {
-				GraphService.checkGraph(graph);
-			} else if (ACTION_CMD_DELETE.equals(btn.getActionCommand())) {
-				graphPanel.deletePickedElements();
-				invalidate();
-				repaint();
-			} else if (ACTION_CMD_ADD.equals(btn.getActionCommand())) {
-		        String s = JOptionPane.showInputDialog("Название нового сервиса");
-		        cb.addItem(s);
-		        graph = new DirectedSparseGraph<Vertex, Unit<Edge>>();
-		        graph.addVertex(new VertexStart());
-		        graph.addVertex(new VertexFinish());
-		        graph = new ObservableGraph<Vertex, Unit<Edge>>(graph);
-		        graphPanel.setVisible(false);
-		        graphPanel = new GraphPanel(graph, config);
-		        getContentPane().add(graphPanel, BorderLayout.CENTER);
-			} else if (ACTION_CMD_MARK.equals(btn.getActionCommand())) {
-				String s = JOptionPane.showInputDialog("Название нового сервиса");
-				if (StringUtils.isNotBlank(s)) {
-					graphPanel.mark(s);
-				}
-			} else if (ACTION_CMD_LOAD.equals(btn.getActionCommand())) {
-				SwingUtilities.invokeLater(new Runnable() {
-
-					public void run() {
-						List<Unit<Edge>> cue = new ArrayList<Unit<Edge>>(graph.getEdges());
-						for (Unit<Edge> ue : cue) {
-							graph.removeEdge(ue);
-						}
-
-						graphPanel.invalidate();
-						graphPanel.repaint();
-					}
-				});
-
-
-//				for (Unit<Edge> ue : graph.getEdges()) {
-//					String sss = "unknown";
-//					if (ue.getValue() instanceof EdgeStart) {
-//						sss = ((EdgeStart) ue.getValue()).toString();
-//					}
-//					if (ue.getValue() instanceof EdgeAction) {
-//						sss = ((EdgeAction) ue.getValue()).toString();
-//					}
-//					if (ue.getValue() instanceof EdgeFinish) {
-//						sss = ((EdgeFinish) ue.getValue()).toString();
-//					}
-//
-//					Pair<Vertex> pr = graph.getEndpoints(ue);
-//					String v1 = "unknown";
-//					String v2 = "unknown";
-//
-//					if (pr.getFirst() instanceof VertexRoom) {
-//						v1 = "room #" + ((VertexRoom) pr.getFirst()).getRoom().getId();
-//					}
-//					if (pr.getFirst() instanceof VertexStart) {
-//						v1 = ((VertexStart) pr.getFirst()).toString();
-//					}
-//					if (pr.getFirst() instanceof VertexFinish) {
-//						v1 = ((VertexFinish) pr.getFirst()).toString();
-//					}
-//
-//					if (pr.getSecond() instanceof VertexRoom) {
-//						v2 = "room #" + ((VertexRoom) pr.getSecond()).getRoom().getId();
-//					}
-//					if (pr.getSecond() instanceof VertexStart) {
-//						v2 = ((VertexStart) pr.getSecond()).toString();
-//					}
-//					if (pr.getSecond() instanceof VertexFinish) {
-//						v2 = ((VertexFinish) pr.getSecond()).toString();
-//					}
-//
-//					System.out.println(v1 + "  --" + sss + "--  " + v2);
-//				}
-
-
-			}
-		}
+		dispatchButtonActions(e);
 
 		if (e.getSource() instanceof Timer) {
 			((Timer) e.getSource()).stop();
@@ -227,14 +139,11 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 			});
 		}
 		if (e.getStateChange() == ItemEvent.DESELECTED) {
-			System.out.println("DESELECTED " + e) ;
 			if (e.getItem() instanceof Vertex) {
 				countSelectedVertexes--;
 			} else {
 				countSelectedEdges--;
 			}
-			boolean res = selectedItem.remove(e.getItem());
-			System.out.println("deselect res = " + res + "  ;  selectedItem.size = " + selectedItem.size());
 			timer.start();
 		}
 
@@ -259,11 +168,22 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 		graphPanel.addPickedEdgeStateItemListener(this);
 		graphPanel.addPickedVertexStateItemListener(this);
 
-		getContentPane().add(graphPanel, BorderLayout.CENTER);
+		Projection prj = new Projection();
+		prj.setName("main projection");
+		lstProjectons = new JList<Projection>(new Projection[] {prj});
+
+		JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		split.setDividerLocation(0.75);
+		split.setOneTouchExpandable(true);
+		split.add(graphPanel, JSplitPane.LEFT);
+		split.add(lstProjectons, JSplitPane.RIGHT);
+
+		getContentPane().add(split, BorderLayout.CENTER);
 		getContentPane().add(initToolBar(), BorderLayout.NORTH);
 
 		lblInfo = new JLabel("V : " + countSelectedVertexes + " ; E : " + countSelectedEdges);
 		JPanel p = new JPanel(new BorderLayout());
+
 		p.add(infoPanel, BorderLayout.CENTER);
 		p.add(lblInfo, BorderLayout.SOUTH);
 		getContentPane().add(p, BorderLayout.SOUTH);
@@ -311,14 +231,80 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
         btn.addActionListener(this);
         tb.add(btn);
 
-
-
         return tb;
 	}
 
+	private void save() {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				LOG.debug("save graph");
+				graphPanel.savePositions();
+				GraphService.saveGraph(graph, false, vertexAndEdgeControl.getRemovedVertexes(),
+						vertexAndEdgeControl.getRemovedEdges());
+			}
+		});
+	}
 
+	private void dispatchButtonActions(ActionEvent e) {
+		if (!(e.getSource() instanceof JButton)) {
+			return;
+		}
+		JButton btn = (JButton) e.getSource();
 
+		switch (btn.getActionCommand()) {
+			case ACTION_CMD_MAGNIFY :
+				graphPanel.magnify();
+				break;
+			case ACTION_CMD_DECREASE :
+				graphPanel.decrease();
+				break;
+			case ACTION_CMD_SAVE :
+				save();
+				break;
+			case ACTION_CMD_CHECK :
+				GraphService.checkGraph(graph);
+				break;
+			case ACTION_CMD_DELETE :
+				graphPanel.deletePickedElements();
+				invalidate();
+				repaint();
+				break;
+			case ACTION_CMD_ADD :
+				String s = JOptionPane.showInputDialog("Название нового сервиса");
+				cb.addItem(s);
+				graph = new DirectedSparseGraph<Vertex, Unit<Edge>>();
+				graph.addVertex(new VertexStart());
+				graph.addVertex(new VertexFinish());
+				graph = new ObservableGraph<Vertex, Unit<Edge>>(graph);
+				graphPanel.setVisible(false);
+				graphPanel = new GraphPanel(graph, config);
+				getContentPane().add(graphPanel, BorderLayout.CENTER);
+				break;
+			case ACTION_CMD_MARK :
+				String mt = JOptionPane.showInputDialog("Текст для выделения");
+				if (StringUtils.isNotBlank(mt)) {
+					graphPanel.mark(mt);
+				}
+				break;
+			case ACTION_CMD_LOAD :
+				SwingUtilities.invokeLater(new Runnable() {
 
+					public void run() {
+						List<Unit<Edge>> cue = new ArrayList<Unit<Edge>>(graph.getEdges());
+						for (Unit<Edge> ue : cue) {
+							graph.removeEdge(ue);
+						}
+
+						graphPanel.invalidate();
+						graphPanel.repaint();
+					}
+				});
+				break;
+
+			default :
+				break;
+		}
+	}
 
 	// =================================================================================================================
 	// Inner and Anonymous Classes

@@ -32,6 +32,7 @@ import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.graphobjects.VertexRoom;
 import ru.intech.ussd.modeler.graphobjects.VertexSpecial;
 import ru.intech.ussd.modeler.transformers.EdgeLabelTransformer;
+import ru.intech.ussd.modeler.transformers.EdgeStrokeTransformer;
 import ru.intech.ussd.modeler.transformers.GraphToFlatTransformer2;
 import ru.intech.ussd.modeler.transformers.RoomShapeTransformer;
 import ru.intech.ussd.modeler.transformers.RoomVertexIconTranformer;
@@ -49,7 +50,6 @@ import edu.uci.ics.jung.visualization.control.CrossoverScalingControl;
 import edu.uci.ics.jung.visualization.control.ScalingControl;
 import edu.uci.ics.jung.visualization.decorators.PickableEdgePaintTransformer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
-import edu.uci.ics.jung.visualization.picking.PickedState;
 
 public class GraphPanel extends JPanel {
 	// =================================================================================================================
@@ -164,16 +164,13 @@ public class GraphPanel extends JPanel {
 	 * set stroke and color transformers for edges, and set tooltip
 	 */
 	private void initEdgeView() {
-		PickedState<Unit<Edge>> pse = vv.getPickedEdgeState();
-        vv.getRenderContext().setEdgeDrawPaintTransformer(new PickableEdgePaintTransformer<Unit<Edge>>(pse, Color.black
-        		, Color.cyan));
-        vv.getRenderContext().setArrowDrawPaintTransformer(new PickableEdgePaintTransformer<Unit<Edge>>(pse, Color.black
-        		, Color.cyan));
-        vv.getRenderContext().setArrowFillPaintTransformer(new PickableEdgePaintTransformer<Unit<Edge>>(pse, Color.black
-        		, Color.cyan));
-//        vv.getRenderContext().setEdgeStrokeTransformer(new EdgeStrokeTransformer());
+		PickableEdgePaintTransformer<Unit<Edge>> t = new PickableEdgePaintTransformer<Unit<Edge>>(vv.getPickedEdgeState(),
+				Color.black, Color.cyan);
+        vv.getRenderContext().setEdgeDrawPaintTransformer(t);
+        vv.getRenderContext().setArrowDrawPaintTransformer(t);
+        vv.getRenderContext().setArrowFillPaintTransformer(t);
+        vv.getRenderContext().setEdgeStrokeTransformer(new EdgeStrokeTransformer());
         vv.getRenderContext().setEdgeLabelTransformer(new EdgeLabelTransformer());
-
         vv.setEdgeToolTipTransformer(new ToStringLabeller<Unit<Edge>>());
 	}
 

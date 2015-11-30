@@ -52,7 +52,8 @@ public class VertexRoom implements Vertex {
 		if (!(obj instanceof VertexRoom)) {
 			return false;
 		}
-		return Objects.equals(src,  edt);
+		VertexRoom other = (VertexRoom) obj;
+		return Objects.equals(this.getRoom(),  other.getRoom());
 	};
 
 	public boolean isChanged() {
