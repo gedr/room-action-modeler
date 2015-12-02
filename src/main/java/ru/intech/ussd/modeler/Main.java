@@ -44,7 +44,7 @@ public class Main {
 //		System.exit(0);
 		PropertyConfigurator.configure(Main.class.getResource("/log4j.properties").getPath());
 
-		final Graph<Vertex, Unit<Edge>> g = GraphService.loadGraph("177");
+		final Graph<Vertex, Unit<Edge>> g = GraphService.loadGraph("333");
 
 		JFrame frame = new MainFrame(g, new GraphConfig());
 		frame.pack();

@@ -16,13 +16,18 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +45,7 @@ import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.ObservableGraph;
 
-public class MainFrame extends JFrame implements ActionListener, ItemListener {
+public class MainFrame extends JFrame implements ActionListener, ItemListener, TableModel {
 	// =================================================================================================================
 	// Constants
 	// =================================================================================================================
@@ -68,12 +73,15 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 	private JComboBox<String> cb;
 	private JLabel lblInfo;
 	private JList<Projection> lstProjectons;
+	private JTable tblProjectons;
+
 
 	private Timer timer = new Timer(750, this);
 
 	private int countSelectedVertexes = 0;
 	private int countSelectedEdges = 0;
 	private List<Object> selectedItem = new ArrayList<Object>();
+	private List<Pair<Projection, Boolean>> projections = new ArrayList<Pair<Projection, Boolean>>();
 
 	// =================================================================================================================
 	// Constructors
@@ -89,6 +97,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 
 		this.config = config;
 		init();
+		initProjection();
 	}
 
 	// =================================================================================================================
@@ -150,6 +159,55 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 		LOG.info("item state changed : {}", e);
 	}
 
+	@Override
+	public int getRowCount() {
+		return projections.size();
+	}
+
+	@Override
+	public int getColumnCount() {
+		return 2;
+	}
+
+	@Override
+	public String getColumnName(int columnIndex) {
+		return columnIndex == 0 ? "активность" : "название";
+	}
+
+	@Override
+	public Class<?> getColumnClass(int columnIndex) {
+		return columnIndex == 0 ? Boolean.class : String.class;
+	}
+
+	@Override
+	public boolean isCellEditable(int rowIndex, int columnIndex) {
+		return true;
+	}
+
+	@Override
+	public Object getValueAt(int rowIndex, int columnIndex) {
+		Pair<Projection, Boolean> p = projections.get(rowIndex);
+		return columnIndex == 0 ? p.getRight() : p.getLeft();
+	}
+
+	@Override
+	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void addTableModelListener(TableModelListener l) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void removeTableModelListener(TableModelListener l) {
+		// TODO Auto-generated method stub
+
+	}
+
 
 	// =================================================================================================================
 	// Getter & Setter
@@ -158,6 +216,12 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 	// =================================================================================================================
 	// Methods
 	// =================================================================================================================
+	private void initProjection() {
+		Projection p = new Projection();
+		p.setName("default");
+		projections.add(Pair.of(p, true));
+	}
+
 	private void init() {
 		setTitle("Ussd graph editor");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -171,12 +235,14 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 		Projection prj = new Projection();
 		prj.setName("main projection");
 		lstProjectons = new JList<Projection>(new Projection[] {prj});
+		tblProjectons = new JTable(this);
 
 		JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		split.setDividerLocation(0.75);
 		split.setOneTouchExpandable(true);
 		split.add(graphPanel, JSplitPane.LEFT);
-		split.add(lstProjectons, JSplitPane.RIGHT);
+//		split.add(lstProjectons, JSplitPane.RIGHT);
+		split.add(new JScrollPane(tblProjectons), JSplitPane.RIGHT);
 
 		getContentPane().add(split, BorderLayout.CENTER);
 		getContentPane().add(initToolBar(), BorderLayout.NORTH);
