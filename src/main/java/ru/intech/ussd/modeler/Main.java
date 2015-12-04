@@ -80,7 +80,6 @@ public class Main {
 			Main.runMethod(this, "testA", new Object[0]);
 			Main.runMethod(this, "testB", 10);
 			Main.runMethod(this, "testC", new GraphConfig());
-
 		}
 
 		public void testA() {
