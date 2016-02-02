@@ -102,22 +102,28 @@ public class GraphToFlatTransformer2 implements Transformer<Graph<Vertex, Unit<E
 				points.add(map.get(vr));
 			}
 		}
-		Point2D ret = new Point(0, 0);
+		double x = 0.0;
+		double y = 0.0;
 		if (!points.isEmpty()) {
-			 ret = points.get(0);
-			 int diff = -1;
-			 for (Point2D p : points) {
-				 if (v instanceof VertexStart) {
-					 ret.setLocation( ((ret.getX() <= p.getX()) ? ret.getX() : p.getX()), ((ret.getY() + p.getY()) / 2) );
-				 } else {
-					 diff = 1;
-					 ret.setLocation( ((ret.getX() >= p.getX()) ? ret.getX() : p.getX()), ((ret.getY() + p.getY()) / 2) );
-				 }
-			 }
+			x = points.get(0).getX();
+			y = points.get(0).getY();
 
-			 ret.setLocation(ret.getX() + diff *  (100 + config.getRoomWidth() / 2), ret.getY());
+			for (Point2D p : points) {
+				if (v instanceof VertexStart) {
+					x = ( x <= p.getX() ? x : p.getX());
+					y = (y + p.getY() ) / 2;
+//					ret.setLocation(((ret.getX() <= p.getX()) ? ret.getX() : p.getX()), ((ret.getY() + p.getY()) / 2));
+				} else {
+					x = ( x >= p.getX() ? x : p.getX());
+					y = (y + p.getY() ) / 2;
+
+//					ret.setLocation(((ret.getX() >= p.getX()) ? ret.getX() : p.getX()), ((ret.getY() + p.getY()) / 2));
+				}
+			}
+//			ret.setLocation(ret.getX() + diff * (100 + config.getRoomWidth() / 2), ret.getY());
 		}
-		return ret;
+		double k = (v instanceof VertexStart ? -1.0 : 1.0);
+		return new Point2D.Double(x + k * (100 + config.getRoomWidth() * 2), y);
 	}
 
 	private Map<Vertex, Point2D> format(Graph<Vertex, Unit<Edge>> graph) {
