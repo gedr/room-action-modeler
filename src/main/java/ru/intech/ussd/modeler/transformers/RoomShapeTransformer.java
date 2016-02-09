@@ -1,11 +1,13 @@
 package ru.intech.ussd.modeler.transformers;
 
 import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
 import org.apache.commons.collections15.Transformer;
 
 import ru.intech.ussd.modeler.graphobjects.Vertex;
+import ru.intech.ussd.modeler.graphobjects.VertexSpecial;
 
 public class RoomShapeTransformer implements Transformer<Vertex,Shape> {
 	// =================================================================================================================
@@ -20,6 +22,7 @@ public class RoomShapeTransformer implements Transformer<Vertex,Shape> {
 	private double scaleX;
 	private double scaleY;
 	private Rectangle2D shape;
+	private java.awt.geom.Ellipse2D specShape;
 
 	// =================================================================================================================
 	// Constructors
@@ -29,13 +32,15 @@ public class RoomShapeTransformer implements Transformer<Vertex,Shape> {
 		this.height = height;
 		scaleX = scaleY = 1.0;
 		shape = new Rectangle2D.Double(-width/2, -height/2, width, height);
+		double r = width < height ? width : height;
+		specShape = new Ellipse2D.Double(-r / 2, -r / 2, r, r);
 	}
 
 	// =================================================================================================================
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
 	public Shape transform(Vertex input) {
-		return shape;
+		return input instanceof VertexSpecial ? specShape : shape;
 	}
 
 	// =================================================================================================================
@@ -47,7 +52,7 @@ public class RoomShapeTransformer implements Transformer<Vertex,Shape> {
 
 	public void setWidth(double width) {
 		this.width = width;
-		setRect();
+		setShapes();
 	}
 
 	public double getHeight() {
@@ -56,7 +61,7 @@ public class RoomShapeTransformer implements Transformer<Vertex,Shape> {
 
 	public void setHeight(double height) {
 		this.height = height;
-		setRect();
+		setShapes();
 	}
 
 	public double getScaleX() {
@@ -65,7 +70,7 @@ public class RoomShapeTransformer implements Transformer<Vertex,Shape> {
 
 	public void setScaleX(double scalex) {
 		this.scaleX = scalex;
-		setRect();
+		setShapes();
 	}
 
 	public double getScaleY() {
@@ -74,7 +79,7 @@ public class RoomShapeTransformer implements Transformer<Vertex,Shape> {
 
 	public void setScaleY(double scaley) {
 		this.scaleY = scaley;
-		setRect();
+		setShapes();
 	}
 
 	// =================================================================================================================
@@ -82,13 +87,15 @@ public class RoomShapeTransformer implements Transformer<Vertex,Shape> {
 	// =================================================================================================================
 	public void setScale(double scale) {
 		scaleX = scaleY = scale;
-		setRect();
+		setShapes();
 	}
 
-	private void setRect() {
+	private void setShapes() {
 		double w = width * scaleX;
 		double h = height * scaleY;
+		double r = w < h ? w : h;
 		shape.setRect(-w/2, -h/2, w, h);
+		specShape.setFrame(-r / 2, -r / 2, r, r);
 	}
 
 	// =================================================================================================================

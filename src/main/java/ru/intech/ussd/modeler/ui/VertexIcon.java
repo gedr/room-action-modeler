@@ -1,8 +1,10 @@
 package ru.intech.ussd.modeler.ui;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
@@ -56,12 +58,15 @@ public class VertexIcon implements Icon {
 		label.setFont(config.getRoomFont().deriveFont((float) (config.getRoomFont().getSize() * scale)));
 
 		if (vertex instanceof VertexStart) {
-			label.setText(SpecialVertexName.start);
-			label.setBackground(picked ? config.getColorStartRoom().brighter() : config.getColorStartRoom());
+			drawStartVertex(g, x, y);
+			return;
 		}
 		if (vertex instanceof VertexFinish) {
-			label.setText(SpecialVertexName.finish);
-			label.setBackground(picked ? config.getColorFinishRoom().brighter() : config.getColorFinishRoom());
+			drawFinishVertex(g, x, y);
+			return;
+//
+//			label.setText(SpecialVertexName.finish);
+//			label.setBackground(picked ? config.getColorFinishRoom().brighter() : config.getColorFinishRoom());
 		}
 		if (vertex instanceof VertexRoom) {
 			Room room = ((VertexRoom) vertex).getRoom();
@@ -127,6 +132,24 @@ public class VertexIcon implements Icon {
 	// =================================================================================================================
 	// Methods
 	// =================================================================================================================
+	private void drawStartVertex(Graphics g, int x, int y) {
+		int w = getIconWidth();
+		int h = getIconHeight();
+		int r = w < h ? w : h;
+		g.setColor(isPicked() ? config.getColorStartRoom().brighter() : config.getColorStartRoom());
+		g.fillOval(x + (w - r) / 2 , y + (h -r) / 2, r, r);
+	}
+
+	private void drawFinishVertex(Graphics g, int x, int y) {
+		int w = getIconWidth();
+		int h = getIconHeight();
+		int r = w < h ? w : h;
+		r -= 5;
+		Graphics2D g2 = (Graphics2D) g;
+		g2.setColor(isPicked() ? config.getColorStartRoom().brighter() : config.getColorStartRoom());
+		g2.setStroke(new BasicStroke(10));
+		g2.drawOval(x + (w - r) / 2 , y + (h -r) / 2, r, r);
+	}
 
 	// =================================================================================================================
 	// Inner and Anonymous Classes
