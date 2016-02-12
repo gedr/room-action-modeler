@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
@@ -144,11 +145,25 @@ public class VertexIcon implements Icon {
 		int w = getIconWidth();
 		int h = getIconHeight();
 		int r = w < h ? w : h;
-		r -= 5;
+		r -= 10;
 		Graphics2D g2 = (Graphics2D) g;
+		Stroke bakStroke = g2.getStroke();
+		Color bakColor = g2.getColor();
+
+		g.setColor(Color.WHITE);
+		g.fillOval(x + (w - r) / 2 , y + (h -r) / 2, r, r);
+
 		g2.setColor(isPicked() ? config.getColorStartRoom().brighter() : config.getColorStartRoom());
 		g2.setStroke(new BasicStroke(10));
 		g2.drawOval(x + (w - r) / 2 , y + (h -r) / 2, r, r);
+		g2.drawLine((int) (x + (w - r) / 2 + 10), (int) (y + (h - r) / 2 + 10)
+				, (int) (x + (w + r) / 2 - 10), (int) (y + (h + r) / 2 - 10));
+		g2.drawLine((int) (x + (w + r) / 2 - 10), (int) (y + (h - r) / 2 + 10)
+				, (int) (x + (w - r) / 2 + 10), (int) (y + (h + r) / 2 - 10));
+
+
+		g2.setStroke(bakStroke);
+		g2.setColor(bakColor);
 	}
 
 	// =================================================================================================================

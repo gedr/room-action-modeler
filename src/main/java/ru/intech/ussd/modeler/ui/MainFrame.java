@@ -13,11 +13,11 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
@@ -72,7 +72,6 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener, T
 	private InfoPanel infoPanel;
 	private JComboBox<String> cb;
 	private JLabel lblInfo;
-	private JList<Projection> lstProjectons;
 	private JTable tblProjectons;
 
 
@@ -234,15 +233,34 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener, T
 
 		Projection prj = new Projection();
 		prj.setName("main projection");
-		lstProjectons = new JList<Projection>(new Projection[] {prj});
 		tblProjectons = new JTable(this);
 
+		JTabbedPane tbd = new JTabbedPane(JTabbedPane.LEFT);
+		tbd.add(new JScrollPane(tblProjectons), 0);
+		tbd.add(new JScrollPane(new JPanel()), 1);
+		tbd.add(new JScrollPane(new JPanel()), 2);
+
+		// Create vertical labels to render tab titles
+		JLabel tab1 = new JLabel("Layers");
+		tab1.setUI(new VerticalLabelUI(false)); // true/false to make it upwards/downwards
+		tbd.setTabComponentAt(0, tab1); // For component1
+
+		JLabel tab2 = new JLabel("Vertexes");
+		tab2.setUI(new VerticalLabelUI(false)); // true/false to make it upwards/downwards
+		tbd.setTabComponentAt(1, tab2); // For component1
+
+		JLabel tab3 = new JLabel("Edges");
+		tab3.setUI(new VerticalLabelUI(false)); // true/false to make it upwards/downwards
+		tbd.setTabComponentAt(2, tab3); // For component1
+
+
 		JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		split.setDividerLocation(0.75);
+		split.setDividerLocation(0.3);
 		split.setOneTouchExpandable(true);
 		split.add(graphPanel, JSplitPane.LEFT);
-//		split.add(lstProjectons, JSplitPane.RIGHT);
-		split.add(new JScrollPane(tblProjectons), JSplitPane.RIGHT);
+//		split.add(new JScrollPane(tblProjectons), JSplitPane.RIGHT);
+		split.add(tbd, JSplitPane.RIGHT);
+
 
 		getContentPane().add(split, BorderLayout.CENTER);
 		getContentPane().add(initToolBar(), BorderLayout.NORTH);

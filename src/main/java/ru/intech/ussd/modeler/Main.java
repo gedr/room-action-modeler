@@ -1,8 +1,5 @@
 package ru.intech.ussd.modeler;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import javax.swing.JFrame;
 
 import org.apache.log4j.PropertyConfigurator;
@@ -52,6 +49,7 @@ public class Main {
 	}
 
 
+/*
 	private static void runMethod(Object obj, String methodName, Object...objects) {
 
 		Class<?>[] clss = new Class<?>[objects == null ? 0 : objects.length];
@@ -69,12 +67,13 @@ public class Main {
 			e.printStackTrace();
 		}
 	}
-
+*/
 	// =================================================================================================================
 	// Inner and Anonymous Classes
 	// =================================================================================================================
 
 
+	/*
 	private static class A implements Runnable {
 		public void run() {
 			Main.runMethod(this, "testA", new Object[0]);
@@ -95,5 +94,6 @@ public class Main {
 		}
 
 	}
+	*/
 
 }
