@@ -57,10 +57,10 @@ public class Action implements java.io.Serializable {
 	private boolean active;
 
 	@Transient
-	private int hash;
+	Integer hash;
 
 	@Transient
-	private boolean hashActive = false;
+	private UUID uuid = UUID.randomUUID();
 
 	// =================================================================================================================
 	// Constructors
@@ -90,11 +90,10 @@ public class Action implements java.io.Serializable {
 
 	@Override
 	public int hashCode() {
-		if (!hashActive) {
-			synchronized (Room.class) {
-				if (!hashActive) {
-					hashActive = true;
-					hash = (getId() == null ? UUID.randomUUID().hashCode() : getId());
+		if (hash == null) {
+			synchronized (EntryPoint.class) {
+				if (hash == null) {
+					hash = (id != null ? id : uuid.hashCode());
 				}
 			}
 		}
@@ -109,17 +108,17 @@ public class Action implements java.io.Serializable {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof Action)) {
+		if (!Action.class.equals(obj.getClass())) {
 			return false;
 		}
-		Action other = (Action) obj;
-		return Objects.equals(this.getId(), other.getId())
-				&& Objects.equals(this.getCurrentRoom(), other.getCurrentRoom())
-				&& Objects.equals(this.getNextRoom(), other.getNextRoom())
-				&& Objects.equals(this.getService(), other.getService())
-				&& Objects.equals(this.getDescription(), other.getDescription())
-				&& (this.isActive() == other.isActive())
-				&& (this.getKey() == other.getKey());
+		Action that = (Action) obj;
+		return Objects.equals(this.getId(), that.getId())
+				&& Objects.equals(this.getCurrentRoom(), that.getCurrentRoom())
+				&& Objects.equals(this.getNextRoom(), that.getNextRoom())
+				&& Objects.equals(this.getService(), that.getService())
+				&& Objects.equals(this.getDescription(), that.getDescription())
+				&& (this.isActive() == that.isActive())
+				&& (this.getKey() == that.getKey());
 	};
 
 	// =================================================================================================================
@@ -179,6 +178,10 @@ public class Action implements java.io.Serializable {
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+
+	public UUID getUuid() {
+		return this.uuid;
 	}
 
 	// =================================================================================================================

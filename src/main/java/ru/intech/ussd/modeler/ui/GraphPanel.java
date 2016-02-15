@@ -119,7 +119,7 @@ public class GraphPanel extends JPanel {
             public Vertex create() {
             	Room r = new Room();
             	r.setAttribute(new Attribute());
-            	r.getAttribute().setColorAsNum(config.getColorRoom());
+            	r.getAttribute().setColor(config.getColorRoom());
             	Vertex vertex = new VertexRoom(r);
             	map.put(vertex, new Point(0, 0));
                 return vertex;

@@ -57,6 +57,10 @@ public class EdgeStart implements Edge{
 		edt = new EntryPoint(src);
 	}
 
+	public Integer getId() {
+		return src.getId();
+	}
+
 	public String getKey() {
 		return edt.getUserMessage();
 	}

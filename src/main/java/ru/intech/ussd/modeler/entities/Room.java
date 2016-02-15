@@ -64,10 +64,10 @@ public class Room implements java.io.Serializable {
 	private Attribute attribute;
 
 	@Transient
-	private int hash;
+	private Integer hash;
 
 	@Transient
-	private boolean hashActive = false;
+	private UUID uuid = UUID.randomUUID();
 
 	// =================================================================================================================
 	// Constructors
@@ -97,11 +97,10 @@ public class Room implements java.io.Serializable {
 
 	@Override
 	public int hashCode() {
-		if (!hashActive) {
+		if (hash == null) {
 			synchronized (Room.class) {
-				if (!hashActive) {
-					hashActive = true;
-					hash = (getId() == null ? UUID.randomUUID().hashCode() : getId());
+				if (hash == null) {
+					hash = (id != null ? id : uuid.hashCode());
 				}
 			}
 		}
@@ -116,16 +115,16 @@ public class Room implements java.io.Serializable {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof Room)) {
+		if (!Room.class.equals(obj.getClass())) {
 			return false;
 		}
-		Room other = (Room) obj;
-		return Objects.equals(this.getId(), other.getId())
-				&& Objects.equals(this.getDescription(), other.getDescription())
-				&& Objects.equals(this.getFunction(), other.getFunction())
-				&& (this.isFinish() == other.isFinish())
-				&& Objects.equals(this.getAttribute(), other.getAttribute())
-				&& CollectionUtils.isEqualCollection(this.getProjections(), other.getProjections());
+		Room that = (Room) obj;
+		return Objects.equals(this.getId(), that.getId())
+				&& Objects.equals(this.getDescription(), that.getDescription())
+				&& Objects.equals(this.getFunction(), that.getFunction())
+				&& (this.isFinish() == that.isFinish())
+				&& Objects.equals(this.getAttribute(), that.getAttribute())
+				&& CollectionUtils.isEqualCollection(this.getProjections(), that.getProjections());
 	};
 
 	// =================================================================================================================
@@ -177,6 +176,10 @@ public class Room implements java.io.Serializable {
 
 	public Attribute getAttribute() {
 		return attribute;
+	}
+
+	public UUID getUuid() {
+		return this.uuid;
 	}
 
 	// =================================================================================================================

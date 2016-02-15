@@ -62,6 +62,10 @@ public class EdgeAction implements Edge {
 		edt.setDescription(description);
 	}
 
+	public Integer getId() {
+		return src.getId();
+	}
+
 	public char getKey() {
 		return edt.getKey();
 	}

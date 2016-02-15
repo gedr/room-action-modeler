@@ -35,10 +35,10 @@ public class Attribute implements java.io.Serializable {
 	private int colorAsNum;
 
 	@Transient
-	private int hash;
+	private Integer hash;
 
 	@Transient
-	private boolean hashActive = false;
+	private UUID uuid = UUID.randomUUID();
 
 	// =================================================================================================================
 	// Constructors
@@ -65,11 +65,10 @@ public class Attribute implements java.io.Serializable {
 
 	@Override
 	public int hashCode() {
-		if (!hashActive) {
-			synchronized (Attribute.class) {
-				if (!hashActive) {
-					hashActive = true;
-					hash = (getId() == null ? UUID.randomUUID().hashCode() : getId());
+		if (hash == null) {
+			synchronized (EntryPoint.class) {
+				if (hash == null) {
+					hash = (id != null ? id : uuid.hashCode());
 				}
 			}
 		}
@@ -84,17 +83,14 @@ public class Attribute implements java.io.Serializable {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof Attribute)) {
+		if (!Attribute.class.equals(obj.getClass())) {
 			return false;
 		}
-		if (getId() == null) {
-			return false;
-		}
-		Attribute other = (Attribute) obj;
-		return Objects.equals(this.getId(), other.getId())
-				&& (this.getX() == other.getX())
-				&& (this.getY() == other.getY())
-				&& (this.getColorAsNum() == other.getColorAsNum());
+		Attribute that = (Attribute) obj;
+		return Objects.equals(this.getId(), that.getId())
+				&& (this.getX() == that.getX())
+				&& (this.getY() == that.getY())
+				&& (this.getColorAsNum() == that.getColorAsNum());
 	};
 
 	// =================================================================================================================
@@ -132,6 +128,10 @@ public class Attribute implements java.io.Serializable {
 		this.colorAsNum = colorAsNum;
 	}
 
+	public UUID getUuid() {
+		return this.uuid;
+	}
+
 	// =================================================================================================================
 	// Methods
 	// =================================================================================================================
@@ -139,7 +139,7 @@ public class Attribute implements java.io.Serializable {
 		return new Color(colorAsNum);
 	}
 
-	public void setColorAsNum(Color color) {
+	public void setColor(Color color) {
 		this.colorAsNum = color.getRGB();
 	}
 

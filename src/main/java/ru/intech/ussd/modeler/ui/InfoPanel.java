@@ -224,7 +224,7 @@ public class InfoPanel extends JPanel implements ActionListener {
 			if (a == null) {
 				a = new Attribute();
 			}
-			a.setColorAsNum(btnColor.getBackground());
+			a.setColor(btnColor.getBackground());
 			vr.setAttribute(a);
 		}
 	}

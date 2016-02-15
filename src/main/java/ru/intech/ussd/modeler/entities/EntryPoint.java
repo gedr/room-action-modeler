@@ -53,10 +53,10 @@ public class EntryPoint implements java.io.Serializable {
 	private boolean active;
 
 	@Transient
-	private int hash;
+	private Integer hash;
 
 	@Transient
-	private boolean hashActive = false;
+	private UUID uuid = UUID.randomUUID();
 
 	// =================================================================================================================
 	// Constructors
@@ -80,16 +80,15 @@ public class EntryPoint implements java.io.Serializable {
 	// =================================================================================================================
 	@Override
 	public String toString() {
-		return "Actions [" + id + "] : " + description ;
+		return "EntryPoint [" + getId() + "] : " + description ;
 	}
 
 	@Override
 	public int hashCode() {
-		if (!hashActive) {
-			synchronized (Room.class) {
-				if (!hashActive) {
-					hashActive = true;
-					hash = (getId() == null ? UUID.randomUUID().hashCode() : getId());
+		if (hash == null) {
+			synchronized (EntryPoint.class) {
+				if (hash == null) {
+					hash = (id != null ? id : uuid.hashCode());
 				}
 			}
 		}
@@ -104,16 +103,16 @@ public class EntryPoint implements java.io.Serializable {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof EntryPoint)) {
+		if (!EntryPoint.class.equals(obj.getClass())) {
 			return false;
 		}
-		EntryPoint other = (EntryPoint) obj;
-		return Objects.equals(this.getId(), other.getId())
-				&& Objects.equals(this.getService(), other.getService())
-				&& Objects.equals(this.getDescription(), other.getDescription())
-				&& Objects.equals(this.getUserMessage(), other.getUserMessage())
-				&& (this.isActive() == other.isActive())
-				&& Objects.equals(this.getRoom(), other.getRoom());
+		EntryPoint that = (EntryPoint) obj;
+		return Objects.equals(this.getId(), that.getId())
+				&& Objects.equals(this.getService(), that.getService())
+				&& Objects.equals(this.getDescription(), that.getDescription())
+				&& Objects.equals(this.getUserMessage(), that.getUserMessage())
+				&& (this.isActive() == that.isActive())
+				&& Objects.equals(this.getRoom(), that.getRoom());
 	};
 
 	// =================================================================================================================
@@ -165,6 +164,10 @@ public class EntryPoint implements java.io.Serializable {
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+
+	public UUID getUuid() {
+		return this.uuid;
 	}
 
 	// =================================================================================================================

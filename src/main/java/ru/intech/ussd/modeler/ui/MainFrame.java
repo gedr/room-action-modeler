@@ -22,30 +22,29 @@ import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.TableModel;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.intech.ussd.modeler.config.GraphConfig;
 import ru.intech.ussd.modeler.control.VertexAndEdgeControl;
 import ru.intech.ussd.modeler.dao.UssdDaoManager;
-import ru.intech.ussd.modeler.entities.Projection;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.graphobjects.VertexFinish;
 import ru.intech.ussd.modeler.graphobjects.VertexStart;
 import ru.intech.ussd.modeler.services.GraphService;
+import ru.intech.ussd.modeler.ui.tables.EdgeTable;
+import ru.intech.ussd.modeler.ui.tables.ProjectionTable;
+import ru.intech.ussd.modeler.ui.tables.VertexTable;
 import ru.intech.ussd.modeler.util.Unit;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.ObservableGraph;
 
-public class MainFrame extends JFrame implements ActionListener, ItemListener, TableModel {
+public class MainFrame extends JFrame implements ActionListener, ItemListener {
 	// =================================================================================================================
 	// Constants
 	// =================================================================================================================
@@ -80,7 +79,6 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener, T
 	private int countSelectedVertexes = 0;
 	private int countSelectedEdges = 0;
 	private List<Object> selectedItem = new ArrayList<Object>();
-	private List<Pair<Projection, Boolean>> projections = new ArrayList<Pair<Projection, Boolean>>();
 
 	// =================================================================================================================
 	// Constructors
@@ -96,7 +94,6 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener, T
 
 		this.config = config;
 		init();
-		initProjection();
 	}
 
 	// =================================================================================================================
@@ -158,56 +155,6 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener, T
 		LOG.info("item state changed : {}", e);
 	}
 
-	@Override
-	public int getRowCount() {
-		return projections.size();
-	}
-
-	@Override
-	public int getColumnCount() {
-		return 2;
-	}
-
-	@Override
-	public String getColumnName(int columnIndex) {
-		return columnIndex == 0 ? "активность" : "название";
-	}
-
-	@Override
-	public Class<?> getColumnClass(int columnIndex) {
-		return columnIndex == 0 ? Boolean.class : String.class;
-	}
-
-	@Override
-	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return true;
-	}
-
-	@Override
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		Pair<Projection, Boolean> p = projections.get(rowIndex);
-		return columnIndex == 0 ? p.getRight() : p.getLeft();
-	}
-
-	@Override
-	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void addTableModelListener(TableModelListener l) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void removeTableModelListener(TableModelListener l) {
-		// TODO Auto-generated method stub
-
-	}
-
-
 	// =================================================================================================================
 	// Getter & Setter
 	// =================================================================================================================
@@ -215,12 +162,6 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener, T
 	// =================================================================================================================
 	// Methods
 	// =================================================================================================================
-	private void initProjection() {
-		Projection p = new Projection();
-		p.setName("default");
-		projections.add(Pair.of(p, true));
-	}
-
 	private void init() {
 		setTitle("Ussd graph editor");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -231,34 +172,28 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener, T
 		graphPanel.addPickedEdgeStateItemListener(this);
 		graphPanel.addPickedVertexStateItemListener(this);
 
-		Projection prj = new Projection();
-		prj.setName("main projection");
-		tblProjectons = new JTable(this);
-
 		JTabbedPane tbd = new JTabbedPane(JTabbedPane.LEFT);
-		tbd.add(new JScrollPane(tblProjectons), 0);
-		tbd.add(new JScrollPane(new JPanel()), 1);
-		tbd.add(new JScrollPane(new JPanel()), 2);
+		tbd.add(new JScrollPane(ProjectionTable.createSwingTable(graph)), 0);
+		tbd.add(new JScrollPane(VertexTable.createSwingTable(graph)), 1);
+		tbd.add(new JScrollPane(EdgeTable.createSwingTable(graph)), 2);
 
 		// Create vertical labels to render tab titles
-		JLabel tab1 = new JLabel("Layers");
+		JLabel tab1 = new JLabel(" Projection ");
 		tab1.setUI(new VerticalLabelUI(false)); // true/false to make it upwards/downwards
 		tbd.setTabComponentAt(0, tab1); // For component1
 
-		JLabel tab2 = new JLabel("Vertexes");
+		JLabel tab2 = new JLabel(" Vertexes ");
 		tab2.setUI(new VerticalLabelUI(false)); // true/false to make it upwards/downwards
 		tbd.setTabComponentAt(1, tab2); // For component1
 
-		JLabel tab3 = new JLabel("Edges");
+		JLabel tab3 = new JLabel(" Edges ");
 		tab3.setUI(new VerticalLabelUI(false)); // true/false to make it upwards/downwards
 		tbd.setTabComponentAt(2, tab3); // For component1
 
-
 		JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		split.setDividerLocation(0.3);
+		split.setDividerLocation(0.5);
 		split.setOneTouchExpandable(true);
 		split.add(graphPanel, JSplitPane.LEFT);
-//		split.add(new JScrollPane(tblProjectons), JSplitPane.RIGHT);
 		split.add(tbd, JSplitPane.RIGHT);
 
 
@@ -268,7 +203,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener, T
 		lblInfo = new JLabel("V : " + countSelectedVertexes + " ; E : " + countSelectedEdges);
 		JPanel p = new JPanel(new BorderLayout());
 
-		p.add(infoPanel, BorderLayout.CENTER);
+//		p.add(infoPanel, BorderLayout.CENTER);
 		p.add(lblInfo, BorderLayout.SOUTH);
 		getContentPane().add(p, BorderLayout.SOUTH);
 	}
