@@ -18,7 +18,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -71,8 +70,6 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 	private InfoPanel infoPanel;
 	private JComboBox<String> cb;
 	private JLabel lblInfo;
-	private JTable tblProjectons;
-
 
 	private Timer timer = new Timer(750, this);
 
