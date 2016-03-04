@@ -107,8 +107,11 @@ public class EntryPoint implements java.io.Serializable {
 			return false;
 		}
 		EntryPoint that = (EntryPoint) obj;
-		return Objects.equals(this.getId(), that.getId())
-				&& Objects.equals(this.getService(), that.getService())
+		boolean idcmpr = Objects.equals(this.getId(), that.getId());
+		if (idcmpr && this.getId() == null) {
+			idcmpr = this.getUuid().equals(that.getUuid());
+		}
+		return idcmpr && Objects.equals(this.getService(), that.getService())
 				&& Objects.equals(this.getDescription(), that.getDescription())
 				&& Objects.equals(this.getUserMessage(), that.getUserMessage())
 				&& (this.isActive() == that.isActive())

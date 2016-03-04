@@ -112,8 +112,11 @@ public class Action implements java.io.Serializable {
 			return false;
 		}
 		Action that = (Action) obj;
-		return Objects.equals(this.getId(), that.getId())
-				&& Objects.equals(this.getCurrentRoom(), that.getCurrentRoom())
+		boolean idcmpr = Objects.equals(this.getId(), that.getId());
+		if (idcmpr && this.getId() == null) {
+			idcmpr = this.getUuid().equals(that.getUuid());
+		}
+		return idcmpr && Objects.equals(this.getCurrentRoom(), that.getCurrentRoom())
 				&& Objects.equals(this.getNextRoom(), that.getNextRoom())
 				&& Objects.equals(this.getService(), that.getService())
 				&& Objects.equals(this.getDescription(), that.getDescription())

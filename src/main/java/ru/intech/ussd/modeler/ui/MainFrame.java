@@ -200,7 +200,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 		lblInfo = new JLabel("V : " + countSelectedVertexes + " ; E : " + countSelectedEdges);
 		JPanel p = new JPanel(new BorderLayout());
 
-//		p.add(infoPanel, BorderLayout.CENTER);
+		p.add(infoPanel, BorderLayout.CENTER);
 		p.add(lblInfo, BorderLayout.SOUTH);
 		getContentPane().add(p, BorderLayout.SOUTH);
 	}

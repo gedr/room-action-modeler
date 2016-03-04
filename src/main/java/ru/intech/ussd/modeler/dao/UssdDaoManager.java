@@ -5,8 +5,13 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -223,7 +228,59 @@ public class UssdDaoManager {
 		}
 	}
 
+
 	// =================================================================================================================
 	// Inner and Anonymous Classes
 	// =================================================================================================================
+
+
+
+	public static Pair<Set<Integer>, Set<Integer>> loadEntryPointAndActionIds(String prefix) {
+		String sql = "; WITH RECURSIVE r AS ( SELECT room_id AS rid, true AS tp, id FROM test.entry_points WHERE :prefix = srv "
+				+ "UNION "
+				+ "SELECT a.next_room_id AS rid, false AS tp, a.id FROM test.actions a JOIN r ON r.id = a.current_room_id )  "
+				+ "SELECT tp, id FROM r;";
+		try {
+			List<Object[]> lst = ussd.executeAndGetResultList(QUERY_LANG.SQL, sql, OrmHelper.QueryAttrs.build()
+					.addScalar("tp", Hibernate.BOOLEAN).addScalar("id", Hibernate.INTEGER)
+					.setParam("prefix", prefix));
+			if (!lst.isEmpty()) {
+				Set<Integer> epids = new TreeSet<Integer>();
+				Set<Integer> aids = new TreeSet<Integer>();
+
+				for (Object[] objs : lst) {
+					if ((Boolean) objs[0]) {
+						epids.add((Integer) objs[1]);
+					} else {
+						aids.add((Integer) objs[1]);
+					}
+				}
+				return ImmutablePair.of(epids, aids);
+			}
+		} catch (Throwable e) {
+			LOG.error("loadEntryPointForService failed : ", e);
+		}
+		return null;
+	}
+
+	public static List<EntryPoint> loadEntryPointByIds(Collection<Integer> ids) {
+		String hsql = "SELECT ep FROM EntryPoint AS ep INNER JOIN FETCH ep.room WHERE ep.id IN (:ids)";
+		try {
+			return ussd.executeAndGetResultList(QUERY_LANG.HSQL, hsql, OrmHelper.QueryAttrs.build().setParam("ids", ids));
+		} catch (Throwable e) {
+			LOG.error("loadEntryPointByIds failed : ", e);
+		}
+		return Collections.emptyList();
+	}
+
+	public static List<Action> loadActionByIds(Collection<Integer> ids) {
+		String hsql = "SELECT a FROM Action AS a INNER JOIN FETCH a.currentRoom INNER JOIN FETCH a.nextRoom WHERE a.id IN (:ids)";
+		try {
+			return ussd.executeAndGetResultList(QUERY_LANG.HSQL, hsql, OrmHelper.QueryAttrs.build().setParam("ids", ids));
+		} catch (Throwable e) {
+			LOG.error("loadActionByIds failed : ", e);
+		}
+		return Collections.emptyList();
+	}
+
 }

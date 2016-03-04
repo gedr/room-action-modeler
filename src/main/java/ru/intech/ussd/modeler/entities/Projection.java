@@ -83,7 +83,12 @@ public class Projection implements java.io.Serializable {
 			return false;
 		}
 		Projection that = (Projection) obj;
-		return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getName(), that.getName());
+		boolean idcmpr = Objects.equals(this.getId(), that.getId());
+		if (idcmpr && this.getId() == null) {
+			idcmpr = this.getUuid().equals(that.getUuid());
+		}
+
+		return idcmpr && Objects.equals(this.getName(), that.getName());
 	};
 
 	// =================================================================================================================

@@ -87,8 +87,11 @@ public class Attribute implements java.io.Serializable {
 			return false;
 		}
 		Attribute that = (Attribute) obj;
-		return Objects.equals(this.getId(), that.getId())
-				&& (this.getX() == that.getX())
+		boolean idcmpr = Objects.equals(this.getId(), that.getId());
+		if (idcmpr && this.getId() == null) {
+			idcmpr = this.getUuid().equals(that.getUuid());
+		}
+		return idcmpr && (this.getX() == that.getX())
 				&& (this.getY() == that.getY())
 				&& (this.getColorAsNum() == that.getColorAsNum());
 	};

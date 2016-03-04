@@ -119,8 +119,12 @@ public class Room implements java.io.Serializable {
 			return false;
 		}
 		Room that = (Room) obj;
-		return Objects.equals(this.getId(), that.getId())
-				&& Objects.equals(this.getDescription(), that.getDescription())
+		boolean idcmpr = Objects.equals(this.getId(), that.getId());
+		if (idcmpr && this.getId() == null) {
+			idcmpr = this.getUuid().equals(that.getUuid());
+		}
+
+		return idcmpr && Objects.equals(this.getDescription(), that.getDescription())
 				&& Objects.equals(this.getFunction(), that.getFunction())
 				&& (this.isFinish() == that.isFinish())
 				&& Objects.equals(this.getAttribute(), that.getAttribute())
