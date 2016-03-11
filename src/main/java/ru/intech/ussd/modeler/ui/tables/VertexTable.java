@@ -20,10 +20,17 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
+import ru.intech.ussd.modeler.events.EventBusHolder;
+import ru.intech.ussd.modeler.events.EventType;
+import ru.intech.ussd.modeler.events.VertexEvent;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.graphobjects.VertexRoom;
 import ru.intech.ussd.modeler.util.Unit;
+
+import com.google.common.eventbus.AllowConcurrentEvents;
+import com.google.common.eventbus.Subscribe;
+
 import edu.uci.ics.jung.graph.Graph;
 
 public class VertexTable extends AbstractCellEditor implements TableModel, TableCellRenderer, TableCellEditor, ActionListener {
@@ -53,9 +60,11 @@ public class VertexTable extends AbstractCellEditor implements TableModel, Table
 	// Constructors
 	// =================================================================================================================
 	public VertexTable() {
+		EventBusHolder.getEventBus().register(this);
 	}
 
 	public VertexTable(Graph<Vertex, Unit<Edge>> graph) {
+		EventBusHolder.getEventBus().register(this);
 		setGraph(graph);
 	}
 
@@ -245,6 +254,20 @@ public class VertexTable extends AbstractCellEditor implements TableModel, Table
                                         colorChooser,
                                         this,  //OK button handler
                                         null); //no CANCEL button handler
+	}
+
+	@Subscribe
+	@AllowConcurrentEvents
+	public void EventHandler(VertexEvent event) {
+		if (event.getVertex() instanceof VertexRoom) {
+			if (event.getEventType().equals(EventType.ADD)) {
+				vertexes.add((VertexRoom) event.getVertex());
+			}
+			if (event.getEventType().equals(EventType.REMOVE)) {
+				vertexes.remove((VertexRoom) event.getVertex());
+			}
+		}
+
 	}
 
 	// =================================================================================================================

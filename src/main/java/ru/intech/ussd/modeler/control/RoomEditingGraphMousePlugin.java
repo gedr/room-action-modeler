@@ -47,7 +47,6 @@ public class RoomEditingGraphMousePlugin<V, E> extends EditingGraphMousePlugin<V
 	// =================================================================================================================
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
-//	@SuppressWarnings("unchecked")
     @Override
 	public void mousePressed(MouseEvent e) {
 		if (checkModifiers(e)) {

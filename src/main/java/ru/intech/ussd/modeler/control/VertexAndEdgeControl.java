@@ -3,9 +3,10 @@ package ru.intech.ussd.modeler.control;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import ru.intech.ussd.modeler.events.EdgeEvent;
+import ru.intech.ussd.modeler.events.EventBusHolder;
+import ru.intech.ussd.modeler.events.EventType;
+import ru.intech.ussd.modeler.events.VertexEvent;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.EdgeAction;
 import ru.intech.ussd.modeler.graphobjects.EdgeFinish;
@@ -24,7 +25,7 @@ public class VertexAndEdgeControl implements GraphEventListener<Vertex, Unit<Edg
 	// =================================================================================================================
 	// Constants
 	// =================================================================================================================
-	private static final Logger LOG = LoggerFactory.getLogger(VertexAndEdgeControl.class);
+//	private static final Logger LOG = LoggerFactory.getLogger(VertexAndEdgeControl.class);
 
 	// =================================================================================================================
 	// Fields
@@ -49,9 +50,9 @@ public class VertexAndEdgeControl implements GraphEventListener<Vertex, Unit<Edg
 			case EDGE_ADDED :
 				edge = ((GraphEvent.Edge<Vertex, Unit<Edge>>) evt).getEdge();
 				if (edge.getValue() == null) {
-					createEdge(evt.getSource(), edge);
+					edge = createEdge(evt.getSource(), edge);
 				}
-				LOG.debug("EDGE_ADDED : {}", edge);
+				EventBusHolder.getEventBus().post(new EdgeEvent(edge.getValue(), EventType.ADD));
 				break;
 
 			case EDGE_REMOVED :
@@ -64,12 +65,12 @@ public class VertexAndEdgeControl implements GraphEventListener<Vertex, Unit<Edg
 						&& (((EdgeAction) edge.getValue()).getAction().getId() != null)) {
 					removedEdges.add(edge.getValue());
 				}
-				LOG.debug("EDGE_REMOVED : {}", edge);
+				EventBusHolder.getEventBus().post(new EdgeEvent(edge.getValue(), EventType.REMOVE));
 				break;
 
 			case VERTEX_ADDED :
 				vertex = ((GraphEvent.Vertex<Vertex, Unit<Edge>>) evt).getVertex();
-				LOG.debug("VERTEX_ADDED : {}", vertex);
+				EventBusHolder.getEventBus().post(new VertexEvent(vertex, EventType.ADD));
 				break;
 
 			case VERTEX_REMOVED :
@@ -78,7 +79,7 @@ public class VertexAndEdgeControl implements GraphEventListener<Vertex, Unit<Edg
 						&& (((VertexRoom) vertex).getRoom().getId() != null)) {
 					removedVertexes.add(vertex);
 				}
-				LOG.debug("VERTEX_REMOVED : {}", vertex);
+				EventBusHolder.getEventBus().post(new VertexEvent(vertex, EventType.REMOVE));
 				break;
 		}
 	}
@@ -97,7 +98,7 @@ public class VertexAndEdgeControl implements GraphEventListener<Vertex, Unit<Edg
 	// =================================================================================================================
 	// Methods
 	// =================================================================================================================
-	private void createEdge(Graph<Vertex, Unit<Edge>> graph, Unit<Edge> edge) {
+	private Unit<Edge> createEdge(Graph<Vertex, Unit<Edge>> graph, Unit<Edge> edge) {
 		Pair<Vertex> pair = graph.getEndpoints(edge);
 		Vertex src = graph.isSource(pair.getFirst(), edge) ? pair.getFirst() : pair.getSecond();
 		Vertex dst = graph.isDest(pair.getFirst(), edge) ? pair.getFirst() : pair.getSecond();
@@ -105,13 +106,17 @@ public class VertexAndEdgeControl implements GraphEventListener<Vertex, Unit<Edg
 		if (dst instanceof VertexFinish) {
 			edge.setValue(new EdgeFinish());
 		} else if (src instanceof VertexStart) {
-			edge.setValue(new EdgeStart(null));
+			EdgeStart e = new EdgeStart(null);
+			e.setActive(true);
+			e.setKey("unknown");
+			edge.setValue(e);
 		} else {
 			EdgeAction edgeAction = new EdgeAction(null);
 			edgeAction.setKey('-');
 			edgeAction.setActive(true);
 			edge.setValue(edgeAction);
 		}
+		return edge;
 	}
 
 	// =================================================================================================================
