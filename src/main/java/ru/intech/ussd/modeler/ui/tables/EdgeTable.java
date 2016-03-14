@@ -7,11 +7,18 @@ import javax.swing.JTable;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
+import ru.intech.ussd.modeler.events.EdgeEvent;
+import ru.intech.ussd.modeler.events.EventBusHolder;
+import ru.intech.ussd.modeler.events.EventType;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.EdgeAction;
 import ru.intech.ussd.modeler.graphobjects.EdgeStart;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.util.Unit;
+
+import com.google.common.eventbus.AllowConcurrentEvents;
+import com.google.common.eventbus.Subscribe;
+
 import edu.uci.ics.jung.graph.Graph;
 
 public class EdgeTable implements TableModel {
@@ -31,9 +38,11 @@ public class EdgeTable implements TableModel {
 	// Constructors
 	// =================================================================================================================
 	public EdgeTable() {
+		EventBusHolder.getEventBus().register(this);
 	}
 
 	public EdgeTable(Graph<Vertex, Unit<Edge>> graph) {
+		this();
 		setGraph(graph);
 	}
 
@@ -157,6 +166,22 @@ public class EdgeTable implements TableModel {
 			}
 		}
 		edges = lvr;
+	}
+
+	@Subscribe
+	@AllowConcurrentEvents
+	public void EventHandler(EdgeEvent event) {
+//		System.out.println(event.getEdge().getClass().getName());
+//		System.out.println(((EdgeAction) event.getEdge()).getId());
+
+		if ((event.getEdge() instanceof EdgeStart) || (event.getEdge() instanceof EdgeAction)) {
+			if (event.getEventType().equals(EventType.ADD)) {
+				edges.add(event.getEdge());
+			}
+			if (event.getEventType().equals(EventType.REMOVE)) {
+				edges.remove(event.getEdge());
+			}
+		}
 	}
 
 	// =================================================================================================================

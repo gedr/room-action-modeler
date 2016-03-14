@@ -58,7 +58,7 @@ public class EdgeStart implements Edge{
 	}
 
 	public Integer getId() {
-		return src.getId();
+		return src == null ? null : src.getId();
 	}
 
 	public String getKey() {

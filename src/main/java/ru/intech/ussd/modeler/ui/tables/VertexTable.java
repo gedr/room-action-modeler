@@ -64,7 +64,7 @@ public class VertexTable extends AbstractCellEditor implements TableModel, Table
 	}
 
 	public VertexTable(Graph<Vertex, Unit<Edge>> graph) {
-		EventBusHolder.getEventBus().register(this);
+		this();
 		setGraph(graph);
 	}
 

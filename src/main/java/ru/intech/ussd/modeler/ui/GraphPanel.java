@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -27,6 +28,10 @@ import ru.intech.ussd.modeler.control.RoomEditingModalGraphMouse;
 import ru.intech.ussd.modeler.entities.Attribute;
 import ru.intech.ussd.modeler.entities.Projection;
 import ru.intech.ussd.modeler.entities.Room;
+import ru.intech.ussd.modeler.events.EdgeEvent;
+import ru.intech.ussd.modeler.events.EventBusHolder;
+import ru.intech.ussd.modeler.events.EventType;
+import ru.intech.ussd.modeler.events.VertexEvent;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.graphobjects.VertexRoom;
@@ -51,7 +56,7 @@ import edu.uci.ics.jung.visualization.control.ScalingControl;
 import edu.uci.ics.jung.visualization.decorators.PickableEdgePaintTransformer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
-public class GraphPanel extends JPanel {
+public class GraphPanel extends JPanel implements ItemListener {
 	// =================================================================================================================
 	// Constants
 	// =================================================================================================================
@@ -85,6 +90,18 @@ public class GraphPanel extends JPanel {
 	// =================================================================================================================
 	// Methods for/from SuperClass/Interface
 	// =================================================================================================================
+	@Override
+	public void itemStateChanged(final ItemEvent e) {
+		if ((e.getStateChange() == ItemEvent.SELECTED) || (e.getStateChange() == ItemEvent.DESELECTED)) {
+			if (e.getItem() instanceof Vertex) {
+				EventBusHolder.getEventBus().post(new VertexEvent((Vertex) e.getItem(),
+						e.getStateChange() == ItemEvent.SELECTED ? EventType.SELECTED : EventType.DESELECTED));
+			} else {
+				EventBusHolder.getEventBus().post(new EdgeEvent((Edge) ((Unit<?>) e.getItem()).getValue(),
+								e.getStateChange() == ItemEvent.SELECTED ? EventType.SELECTED : EventType.DESELECTED));
+			}
+		}
+	}
 
 	// =================================================================================================================
 	// Getter & Setter
@@ -188,18 +205,22 @@ public class GraphPanel extends JPanel {
 
 	public void addPickedEdgeStateItemListener(ItemListener listener) {
 		vv.getPickedEdgeState().addItemListener(listener);
+		vv.getPickedEdgeState().addItemListener(this);
 	}
 
 	public void removePickedEdgeStateItemListener(ItemListener listener) {
 		vv.getPickedEdgeState().removeItemListener(listener);
+		vv.getPickedEdgeState().removeItemListener(this);
 	}
 
 	public void addPickedVertexStateItemListener(ItemListener listener) {
 		vv.getPickedVertexState().addItemListener(listener);
+		vv.getPickedVertexState().addItemListener(this);
 	}
 
 	public void removePickedVertexStateItemListener(ItemListener listener) {
 		vv.getPickedVertexState().removeItemListener(listener);
+		vv.getPickedVertexState().removeItemListener(this);
 	}
 
 	public void deletePickedElements() {

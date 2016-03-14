@@ -63,7 +63,7 @@ public class EdgeAction implements Edge {
 	}
 
 	public Integer getId() {
-		return src.getId();
+		return src == null ? null : src.getId();
 	}
 
 	public char getKey() {
