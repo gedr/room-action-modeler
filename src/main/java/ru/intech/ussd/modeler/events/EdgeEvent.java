@@ -4,7 +4,7 @@ import org.apache.commons.lang3.Validate;
 
 import ru.intech.ussd.modeler.graphobjects.Edge;
 
-public class EdgeEvent {
+public class EdgeEvent implements GraphEvent {
 	// =================================================================================================================
 	// Constants
 	// =================================================================================================================

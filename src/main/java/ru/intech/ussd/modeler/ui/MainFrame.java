@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +18,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
-import javax.swing.Timer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -30,6 +27,11 @@ import org.slf4j.LoggerFactory;
 import ru.intech.ussd.modeler.config.GraphConfig;
 import ru.intech.ussd.modeler.control.VertexAndEdgeControl;
 import ru.intech.ussd.modeler.dao.UssdDaoManager;
+import ru.intech.ussd.modeler.events.EdgeEvent;
+import ru.intech.ussd.modeler.events.EventBusHolder;
+import ru.intech.ussd.modeler.events.EventType;
+import ru.intech.ussd.modeler.events.GraphEvent;
+import ru.intech.ussd.modeler.events.VertexEvent;
 import ru.intech.ussd.modeler.graphobjects.Edge;
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 import ru.intech.ussd.modeler.graphobjects.VertexFinish;
@@ -39,11 +41,15 @@ import ru.intech.ussd.modeler.ui.tables.EdgeTable;
 import ru.intech.ussd.modeler.ui.tables.ProjectionTable;
 import ru.intech.ussd.modeler.ui.tables.VertexTable;
 import ru.intech.ussd.modeler.util.Unit;
+
+import com.google.common.eventbus.AllowConcurrentEvents;
+import com.google.common.eventbus.Subscribe;
+
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.ObservableGraph;
 
-public class MainFrame extends JFrame implements ActionListener, ItemListener {
+public class MainFrame extends JFrame implements ActionListener { //, ItemListener {
 	// =================================================================================================================
 	// Constants
 	// =================================================================================================================
@@ -71,11 +77,8 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 	private JComboBox<String> cb;
 	private JLabel lblInfo;
 
-	private Timer timer = new Timer(750, this);
-
 	private int countSelectedVertexes = 0;
 	private int countSelectedEdges = 0;
-	private List<Object> selectedItem = new ArrayList<Object>();
 
 	// =================================================================================================================
 	// Constructors
@@ -90,6 +93,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 		((ObservableGraph<Vertex, Unit<Edge>>) this.graph).addGraphEventListener(vertexAndEdgeControl);
 
 		this.config = config;
+		EventBusHolder.getEventBus().register(this);
 		init();
 	}
 
@@ -98,58 +102,6 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 	// =================================================================================================================
 	public void actionPerformed(ActionEvent e) {
 		dispatchButtonActions(e);
-
-		if (e.getSource() instanceof Timer) {
-			((Timer) e.getSource()).stop();
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					if (selectedItem.isEmpty()) {
-						infoPanel.showEmpty();
-					} else {
-						Object o = selectedItem.get(selectedItem.size() - 1);
-						if (o instanceof Vertex) {
-							infoPanel.showVertex((Vertex) o);
-						} else {
-							@SuppressWarnings("unchecked")
-							Unit<Edge> ue = (Unit<Edge>) o;
-							infoPanel.showEdge(ue.getValue());
-						}
-					}
-					lblInfo.setText("V : " + countSelectedVertexes + " ; E : " + countSelectedEdges);
-				}
-			});
-
-		}
-	}
-
-	public void itemStateChanged(final ItemEvent e) {
-		if (e.getStateChange() == ItemEvent.SELECTED) {
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					if (e.getItem() instanceof Vertex) {
-						countSelectedVertexes++;
-						infoPanel.showVertex((Vertex) e.getItem());
-					} else {
-						countSelectedEdges++;
-						@SuppressWarnings("unchecked")
-						Unit<Edge> ue = (Unit<Edge>) e.getItem();
-						infoPanel.showEdge(ue.getValue());
-					}
-					selectedItem.add(e.getItem());
-					lblInfo.setText("V : " + countSelectedVertexes + " ; E : " + countSelectedEdges);
-				}
-			});
-		}
-		if (e.getStateChange() == ItemEvent.DESELECTED) {
-			if (e.getItem() instanceof Vertex) {
-				countSelectedVertexes--;
-			} else {
-				countSelectedEdges--;
-			}
-			timer.start();
-		}
-
-		LOG.info("item state changed : {}", e);
 	}
 
 	// =================================================================================================================
@@ -166,8 +118,8 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 
 		infoPanel = new InfoPanel();
 		graphPanel = new GraphPanel(graph, config);
-		graphPanel.addPickedEdgeStateItemListener(this);
-		graphPanel.addPickedVertexStateItemListener(this);
+//		graphPanel.addPickedEdgeStateItemListener(this);
+//		graphPanel.addPickedVertexStateItemListener(this);
 
 		JTabbedPane tbd = new JTabbedPane(JTabbedPane.LEFT);
 		tbd.add(new JScrollPane(ProjectionTable.createSwingTable(graph)), 0);
@@ -320,6 +272,37 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener {
 			default :
 				break;
 		}
+	}
+
+	@Subscribe
+	@AllowConcurrentEvents
+	public void EventHandler(GraphEvent event) {
+		if (event instanceof VertexEvent) {
+			VertexEvent e = (VertexEvent) event;
+			if (EventType.SELECTED.equals(e.getEventType())) {
+				countSelectedVertexes++;
+				showCommonInfo();
+			}
+			if (EventType.DESELECTED.equals(e.getEventType())) {
+				countSelectedVertexes--;
+				showCommonInfo();
+			}
+		}
+		if (event instanceof EdgeEvent) {
+			EdgeEvent e = (EdgeEvent) event;
+			if (EventType.SELECTED.equals(e.getEventType())) {
+				countSelectedEdges++;
+				showCommonInfo();
+			}
+			if (EventType.DESELECTED.equals(e.getEventType())) {
+				countSelectedEdges--;
+				showCommonInfo();
+			}
+		}
+	}
+
+	private void showCommonInfo() {
+		lblInfo.setText("V : " + countSelectedVertexes + " ; E : " + countSelectedEdges);
 	}
 
 	// =================================================================================================================

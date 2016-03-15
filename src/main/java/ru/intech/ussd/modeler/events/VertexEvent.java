@@ -4,7 +4,7 @@ import org.apache.commons.lang3.Validate;
 
 import ru.intech.ussd.modeler.graphobjects.Vertex;
 
-public class VertexEvent {
+public class VertexEvent implements GraphEvent {
 	// =================================================================================================================
 	// Constants
 	// =================================================================================================================

@@ -153,6 +153,8 @@ public class GraphPanel extends JPanel implements ItemListener {
 
         vv.setGraphMouse(graphMouse);
         vv.addKeyListener(graphMouse.getModeKeyListener());
+        vv.getPickedEdgeState().addItemListener(this);
+        vv.getPickedVertexState().addItemListener(this);
 
         JMenuBar menubar = new JMenuBar();
         menubar.add(graphMouse.getModeMenu());
@@ -205,22 +207,18 @@ public class GraphPanel extends JPanel implements ItemListener {
 
 	public void addPickedEdgeStateItemListener(ItemListener listener) {
 		vv.getPickedEdgeState().addItemListener(listener);
-		vv.getPickedEdgeState().addItemListener(this);
 	}
 
 	public void removePickedEdgeStateItemListener(ItemListener listener) {
 		vv.getPickedEdgeState().removeItemListener(listener);
-		vv.getPickedEdgeState().removeItemListener(this);
 	}
 
 	public void addPickedVertexStateItemListener(ItemListener listener) {
 		vv.getPickedVertexState().addItemListener(listener);
-		vv.getPickedVertexState().addItemListener(this);
 	}
 
 	public void removePickedVertexStateItemListener(ItemListener listener) {
 		vv.getPickedVertexState().removeItemListener(listener);
-		vv.getPickedVertexState().removeItemListener(this);
 	}
 
 	public void deletePickedElements() {
