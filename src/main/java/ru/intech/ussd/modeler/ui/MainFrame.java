@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,6 +19,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -63,6 +65,7 @@ public class MainFrame extends JFrame implements ActionListener { //, ItemListen
 	private static final String ACTION_CMD_LOAD = "load";
 	private static final String ACTION_CMD_ADD = "add";
 	private static final String ACTION_CMD_MARK = "mark";
+	private static final String ACTION_CMD_COPY = "copy";
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainFrame.class);
 
@@ -179,6 +182,10 @@ public class MainFrame extends JFrame implements ActionListener { //, ItemListen
         btn.setActionCommand(ACTION_CMD_DELETE);
         btn.addActionListener(this);
         tb.add(btn);
+        btn = new JButton("copy");
+        btn.setActionCommand(ACTION_CMD_COPY);
+        btn.addActionListener(this);
+        tb.add(btn);
         btn = new JButton("*");
         btn.setActionCommand(ACTION_CMD_MARK);
         btn.addActionListener(this);
@@ -236,6 +243,29 @@ public class MainFrame extends JFrame implements ActionListener { //, ItemListen
 				graphPanel.deletePickedElements();
 				invalidate();
 				repaint();
+				break;
+			case ACTION_CMD_COPY :
+				final JCheckBox[] inputs = new JCheckBox[] {
+						new JCheckBox("Copy internal edges", true),
+						new JCheckBox("Copy input edges", false),
+						new JCheckBox("Copy output edges", false),
+				};
+				if (JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(this, inputs, "Copy Selected", JOptionPane.OK_CANCEL_OPTION)) {
+					LOG.debug("start copy");
+					new SwingWorker<Void, Void>() {
+						@Override
+						public Void doInBackground() {
+							graphPanel.copySelected(inputs[0].isSelected(), inputs[1].isSelected(), inputs[2].isSelected());
+							return null;
+					    }
+
+					    @Override
+					    public void done() {
+							invalidate();
+							repaint();
+					    }
+					}.execute();
+				}
 				break;
 			case ACTION_CMD_ADD :
 				String s = JOptionPane.showInputDialog("Название нового сервиса");

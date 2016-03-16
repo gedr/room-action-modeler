@@ -9,8 +9,10 @@ import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
@@ -289,6 +291,44 @@ public class GraphPanel extends JPanel implements ItemListener {
 				a.setY((int) p.getY());
 				vr.setAttribute(a);
 			}
+		}
+	}
+
+	public void copySelected(boolean copyInternalEdges, boolean copyInputEdges, boolean copyOutputEdges) {
+		for (Vertex v: graph.getVertices()) {
+			if ((v instanceof VertexRoom) && vv.getPickedVertexState().isPicked(v)) {
+					VertexRoom vr = (VertexRoom) v;
+					Room r = new Room();
+					Attribute a = new Attribute(vr.getAttribute());
+					a.setId(null);
+					r.setAttribute(a);
+
+					VertexRoom newvr = new VertexRoom(r);
+					newvr.setDescription(vr.getDescription());
+					newvr.setFinish(vr.isFinish());
+					newvr.setFunction(vr.getFunction());
+					newvr.setProjections(vr.getProjections());
+					map.put(newvr, vv.getModel().getGraphLayout().transform(v));
+					graph.addVertex(newvr);
+
+			}
+		}
+	}
+
+	private Set<VertexRoom> extractSelectedVertex() {
+		Set<VertexRoom> res = new HashSet<VertexRoom>();
+		for (Vertex v: graph.getVertices()) {
+			if ((v instanceof VertexRoom) && vv.getPickedVertexState().isPicked(v)){
+				res.add((VertexRoom) v);
+			}
+		}
+		return res;
+	}
+
+	private void copyEdges(Collection<VertexRoom> cvr) {
+		for(Unit<Edge> edgs : graph.getEdges()) {
+
+
 		}
 	}
 
