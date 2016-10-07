@@ -13,7 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 @Entity
-@Table(schema = "test", name = "projections")
+@Table(schema = "graph", name = "projections")
 public class Projection implements java.io.Serializable {
 	// =================================================================================================================
 	// Constants
@@ -25,7 +25,7 @@ public class Projection implements java.io.Serializable {
 	// =================================================================================================================
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
-	@SequenceGenerator(name = "seq", sequenceName = "test.layers_id_seq", allocationSize = 1)
+	@SequenceGenerator(name = "seq", sequenceName = "graph.layers_id_seq", allocationSize = 1)
 	@Column(name = "id")
 	private Integer id;
 

@@ -11,7 +11,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 @Entity
-@Table(schema = "test", name = "attributes")
+@Table(schema = "graph", name = "attributes")
 public class Attribute implements java.io.Serializable {
 	// =================================================================================================================
 	// Constants

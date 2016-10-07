@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +30,9 @@ import ru.intech.ussd.modeler.graphobjects.VertexFinish;
 import ru.intech.ussd.modeler.graphobjects.VertexRoom;
 import ru.intech.ussd.modeler.graphobjects.VertexStart;
 import ru.intech.ussd.modeler.util.Unit;
+import ru.intech.ussdapi.services.StateMachineServiceImpl;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 
@@ -56,6 +61,55 @@ public class GraphService {
 	// =================================================================================================================
 	// Methods
 	// =================================================================================================================
+
+	private Graph<Vertex, Unit<? extends Edge>> loadGraph(String prefix) {
+//		log.info("loadGraph({})", prefix);
+		List<EntryPoint> eplst = UssdDaoManager.loadEntryPointByPrefix(prefix);
+		List<Action> alst = UssdDaoManager.loadActionByPrefix(prefix);
+		Graph<Vertex, Unit<? extends Edge>> graph = new DirectedSparseMultigraph<Vertex, Unit<? extends Edge>>();
+		addEntryPoints(graph, eplst);
+		addActions(graph, alst);
+//		log.info(">>>> graph load (v : {} ; e : {}) : {}", graph.getVertexCount(), graph.getEdgeCount(), graph);
+		return graph;
+	}
+
+	private void addEntryPoints(Graph<Vertex, Unit<? extends Edge>> graph, List<EntryPoint> lep) {
+		Vertex start = new VertexStart();
+		graph.addVertex(start);
+
+		for (EntryPoint it : lep) {
+			Vertex v = new VertexRoom(it.getRoom());
+			Edge e = new EdgeStart(it);
+			graph.addVertex(v);
+			graph.addEdge(new Unit(e), start, v, EdgeType.DIRECTED);
+
+		}
+	}
+
+	private void addActions(Graph<Vertex, Unit<? extends Edge>> graph, List<Action> la) {
+		boolean flag;
+		do {
+			flag = false;
+			for (Action a : la) {
+				if (graph.getVertices().contains(a.getCurrentRoom())) {
+					String e = a.getKey();
+					e += String.format(" A%08d", a.getId());
+					if (!graph.getOutEdges(a.getCurrentRoom()).contains(e)) {
+						graph.addVertex(a.getNextRoom());
+						graph.addEdge(e, a.getCurrentRoom(), a.getNextRoom(), EdgeType.DIRECTED);
+						flag = true;
+					}
+				}
+			}
+		} while (flag);
+	}
+
+
+	private boolean isGraphContainRoom(Graph<Vertex, Unit<? extends Edge>> graph, Room room) {
+
+	}
+
+
 	public static Graph<Vertex, Unit<Edge>> loadGraph(String service) {
 		List<EntryPoint> eplst = UssdDaoManager.loadEntryPointByService(service);
 		List<Action> aplst = UssdDaoManager.loadActionByService(service);
@@ -279,7 +333,6 @@ public class GraphService {
 				VertexRoom dst = (VertexRoom) graph.getDest(uedge);
 				a.setCurrentRoom(src.getRoom());
 				a.setNextRoom(dst.getRoom());
-				a.setService(service);
 				UssdDaoManager.saveAction(a);
 			}
 		}

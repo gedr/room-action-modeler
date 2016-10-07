@@ -283,4 +283,21 @@ public class UssdDaoManager {
 		return Collections.emptyList();
 	}
 
+
+
+
+
+	public static List<EntryPoint> loadEntryPointByPrefix(String prefix) {
+		String jpql = "SELECT ep FROM EntryPoint ep INNER JOIN FETCH ep.room WHERE ep.prefix = :prefix";
+		return em.createQuery(jpql, EntryPoint.class)
+				.setParameter("prefix", prefix)
+				.getResultList();
+	}
+
+
+	public static List<Action> loadActionByPrefix(String prefix) {
+		String ipql = "SELECT a FROM Action a INNER JOIN FETCH a.currentRoom INNER JOIN FETCH a.nextRoom WHERE a.active = true";
+		return em.createQuery(ipql, Action.class).getResultList();
+	}
+
 }
