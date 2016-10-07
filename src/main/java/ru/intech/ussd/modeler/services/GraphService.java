@@ -1,5 +1,7 @@
 package ru.intech.ussd.modeler.services;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -106,6 +108,9 @@ public class GraphService {
 
 
 	private boolean isGraphContainRoom(Graph<Vertex, Unit<? extends Edge>> graph, Room room) {
+		for (Vertex it : graph.getVertices()) {
+			if ((it instanceof VertexRoom) && ((VertexRoom)it).get)
+		}
 
 	}
 
