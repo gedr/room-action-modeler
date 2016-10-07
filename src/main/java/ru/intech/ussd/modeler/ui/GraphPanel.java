@@ -49,6 +49,7 @@ import edu.uci.ics.jung.algorithms.layout.StaticLayout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.util.EdgeType;
+import edu.uci.ics.jung.graph.util.Pair;
 import edu.uci.ics.jung.visualization.DefaultVisualizationModel;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationModel;
@@ -294,25 +295,29 @@ public class GraphPanel extends JPanel implements ItemListener {
 		}
 	}
 
+//	public void copySelected(boolean copyInternalEdges, boolean copyInputEdges, boolean copyOutputEdges) {
+//		for (Vertex v: graph.getVertices()) {
+//			if ((v instanceof VertexRoom) && vv.getPickedVertexState().isPicked(v)) {
+//					VertexRoom vr = (VertexRoom) v;
+//					Room r = new Room();
+//					Attribute a = new Attribute(vr.getAttribute());
+//					a.setId(null);
+//					r.setAttribute(a);
+//
+//					VertexRoom newvr = new VertexRoom(r);
+//					newvr.setDescription(vr.getDescription());
+//					newvr.setFinish(vr.isFinish());
+//					newvr.setFunction(vr.getFunction());
+//					newvr.setProjections(vr.getProjections());
+//					map.put(newvr, vv.getModel().getGraphLayout().transform(v));
+//					graph.addVertex(newvr);
+//
+//			}
+//		}
+//	}
+
 	public void copySelected(boolean copyInternalEdges, boolean copyInputEdges, boolean copyOutputEdges) {
-		for (Vertex v: graph.getVertices()) {
-			if ((v instanceof VertexRoom) && vv.getPickedVertexState().isPicked(v)) {
-					VertexRoom vr = (VertexRoom) v;
-					Room r = new Room();
-					Attribute a = new Attribute(vr.getAttribute());
-					a.setId(null);
-					r.setAttribute(a);
-
-					VertexRoom newvr = new VertexRoom(r);
-					newvr.setDescription(vr.getDescription());
-					newvr.setFinish(vr.isFinish());
-					newvr.setFunction(vr.getFunction());
-					newvr.setProjections(vr.getProjections());
-					map.put(newvr, vv.getModel().getGraphLayout().transform(v));
-					graph.addVertex(newvr);
-
-			}
-		}
+		Set<VertexRoom> selVertexes = extractSelectedVertex();
 	}
 
 	private Set<VertexRoom> extractSelectedVertex() {
@@ -325,10 +330,28 @@ public class GraphPanel extends JPanel implements ItemListener {
 		return res;
 	}
 
-	private void copyEdges(Collection<VertexRoom> cvr) {
-		for(Unit<Edge> edgs : graph.getEdges()) {
+	private Set<VertexRoom> copyRooms(Collection<VertexRoom> src) {
+		Set<VertexRoom> res = new HashSet<VertexRoom>();
 
+		for (VertexRoom vr : src) {
+			VertexRoom newvr = new VertexRoom(vr.getRoom());
+			newvr.setDescription(vr.getDescription());
+			newvr.setFinish(vr.isFinish());
+			newvr.setFunction(vr.getFunction());
+			newvr.setProjections(vr.getProjections());
+			map.put(newvr, vv.getModel().getGraphLayout().transform(vr));
+			graph.addVertex(newvr);
 
+		}
+		return null;
+	}
+
+	private void copyInnerEdges(Collection<VertexRoom> cvr) {
+		for(Unit<Edge> e : graph.getEdges()) {
+			Pair<Vertex> pv = graph.getEndpoints(e);
+			if (cvr.contains(pv.getFirst()) && cvr.contains(pv.getSecond())) {
+
+			}
 		}
 	}
 

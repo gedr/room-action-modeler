@@ -213,6 +213,7 @@ public class VertexTable extends AbstractCellEditor implements TableModel, Table
 	public static JTable createSwingTable(Graph<Vertex, Unit<Edge>> graph) {
 		VertexTable vt = new VertexTable(graph);
 		JTable tbl = new JTable(vt);
+		tbl.setAutoCreateRowSorter(true);
 		vt.initColorDialog();
 		tbl.getColumnModel().getColumn(0).setMaxWidth(50);
 		tbl.getColumnModel().getColumn(1).setMaxWidth(75);

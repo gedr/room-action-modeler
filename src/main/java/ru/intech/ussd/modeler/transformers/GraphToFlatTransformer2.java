@@ -112,20 +112,21 @@ public class GraphToFlatTransformer2 implements Transformer<Graph<Vertex, Unit<E
 				if (v instanceof VertexStart) {
 					x = ( x <= p.getX() ? x : p.getX());
 					y = (y + p.getY() ) / 2;
-//					ret.setLocation(((ret.getX() <= p.getX()) ? ret.getX() : p.getX()), ((ret.getY() + p.getY()) / 2));
 				} else {
 					x = ( x >= p.getX() ? x : p.getX());
 					y = (y + p.getY() ) / 2;
-
-//					ret.setLocation(((ret.getX() >= p.getX()) ? ret.getX() : p.getX()), ((ret.getY() + p.getY()) / 2));
 				}
 			}
-//			ret.setLocation(ret.getX() + diff * (100 + config.getRoomWidth() / 2), ret.getY());
 		}
 		double k = (v instanceof VertexStart ? -1.0 : 1.0);
 		return new Point2D.Double(x + k * (100 + config.getRoomWidth() * 2), y);
 	}
 
+	/**
+	 * positioning vertex on screen
+	 * @param graph
+	 * @return
+	 */
 	private Map<Vertex, Point2D> format(Graph<Vertex, Unit<Edge>> graph) {
 		List<Vertex> starts = new ArrayList<Vertex>();
 		for (Vertex it : graph.getVertices()) {
@@ -268,7 +269,8 @@ public class GraphToFlatTransformer2 implements Transformer<Graph<Vertex, Unit<E
 
 		Arrays.fill(pos, 0);
 		for (Point2D it : map.values()) {
-			it.setLocation(it.getX(), (int) (((float)pos[(int) Math.round(it.getX())] + 0.5) * yMax / yAllocation[(int) Math.round(it.getX())]) );
+			it.setLocation(it.getX(),
+					(int) (((float)pos[(int) Math.round(it.getX())] + 0.5) * yMax / yAllocation[(int) Math.round(it.getX())]) );
 			pos[(int) Math.round(it.getX())]++;
 		}
 		return map;

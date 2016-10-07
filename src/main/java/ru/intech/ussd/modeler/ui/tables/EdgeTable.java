@@ -149,6 +149,7 @@ public class EdgeTable implements TableModel {
 	public static JTable createSwingTable(Graph<Vertex, Unit<Edge>> graph) {
 		EdgeTable et = new EdgeTable(graph);
 		JTable tbl = new JTable(et);
+		tbl.setAutoCreateRowSorter(true);
 		tbl.getColumnModel().getColumn(0).setMaxWidth(50);
 		tbl.getColumnModel().getColumn(1).setMaxWidth(50);
 		tbl.getColumnModel().getColumn(2).setMaxWidth(75);
